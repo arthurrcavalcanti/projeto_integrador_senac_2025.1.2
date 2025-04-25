@@ -1,0 +1,39 @@
+require('./inicializaBanco.js'); // Inicializa o banco de dados
+
+const express = require('express');
+const cors = require('cors');
+
+const userController = require('./controllers/userController');
+const bookController = require('./controllers/bookController');
+const reviewController = require('./controllers/reviewController');
+
+const app = express();
+
+const corsOptions = {
+  origin: '*',
+  methods: ['GET', 'POST', 'DELETE'],
+  allowedHeaders: ['Content-Type'],
+  credentials: true
+};
+
+app.use(cors(corsOptions));
+app.use(express.json());
+
+app.get('/', (req, res) => res.send('Hello World'));
+
+// USERS
+app.get('/users', userController.list);
+app.post('/users', userController.create);
+app.delete('/users/:id', userController.delete);
+
+// BOOKS
+app.get('/books', bookController.list);
+app.post('/books', bookController.create);
+app.delete('/books/:id', bookController.delete);
+
+// Outros endpoints de livros, reviews, etc virão aqui...
+
+app.listen(3000, "localhost", () => {
+  // mensagens de console.log aqui aparecem no terminal;
+  console.log('✅ Servidor rodando em http://localhost:3000');
+});
