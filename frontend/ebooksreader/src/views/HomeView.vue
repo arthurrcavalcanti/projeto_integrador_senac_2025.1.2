@@ -27,11 +27,6 @@ export default {
     numeroLivros() {
       return this.livros.length
     },
-    descricaoLivro(livro) {
-      return livro.description.length > 100
-        ? livro.description.substring(0, 100) + '...'
-        : livro.description
-    },
   },
   methods: {
     // aqui você pode criar métodos que podem ser chamados em qualquer lugar
@@ -69,7 +64,14 @@ export default {
           <img class="cover" :src="livro.cover" alt="Capa do livro" />
           <h3>{{ livro.title }}</h3>
           <p class="author"><strong>Autor:</strong> {{ livro.author }}</p>
-          <p class="description"><strong>Descrição:</strong> {{ descricaoLivro(livro) }}</p>
+          <p class="description">
+            <strong>Descrição:</strong>
+            {{
+              livro.description.length > 100
+                ? livro.description.substring(0, 100) + '...'
+                : livro.description
+            }}
+          </p>
         </RouterLink>
       </li>
     </ul>
