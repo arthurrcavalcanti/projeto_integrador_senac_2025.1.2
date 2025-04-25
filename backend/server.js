@@ -27,7 +27,7 @@ app.post('/users', userController.create);
 app.delete('/users/:id', userController.delete);
 
 // BOOKS
-app.get('/books', bookController.list);
+app.get('/books', bookController.findOrList);
 app.post('/books', bookController.create);
 app.delete('/books/:id', bookController.delete);
 

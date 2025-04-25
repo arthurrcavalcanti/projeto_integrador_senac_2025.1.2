@@ -6,6 +6,12 @@ export const listarLivros = async () => {
     return await resultado.json();
 }
 
+export const buscarLivros = async (search) => {
+    console.log("Chamando api de pesquisar livros");
+    const resultado = await fetch(`${address}/books?search=${search}`);
+    return await resultado.json();
+}
+
 
 export const adicionarLivro = async (livro) => {
     console.log("Chamando api de adicionar livro");
@@ -22,7 +28,8 @@ export const adicionarLivro = async (livro) => {
 
 const api = {
     listarLivros,
-    adicionarLivro
+    adicionarLivro,
+    buscarLivros
 }
 
 export default api;

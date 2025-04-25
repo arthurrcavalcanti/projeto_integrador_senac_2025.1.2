@@ -10,3 +10,7 @@ body {
     color: #333;
     padding: 1rem;
 }
+
+input {
+    padding: .5em
+}
