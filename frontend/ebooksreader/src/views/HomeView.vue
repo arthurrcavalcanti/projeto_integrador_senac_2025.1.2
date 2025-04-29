@@ -29,19 +29,41 @@ export default {
     },
   },
   methods: {
-    // aqui você pode criar métodos que podem ser chamados em qualquer lugar
-    async listarLivros() {
-      const livros = await api.listarLivros()
-      console.log('Livros:', { livros })
-      this.livros = livros
-    },
-    async buscarLivro() {
-      const { pesquisa } = this
-      const livros = await api.buscarLivros(pesquisa)
-      console.log('Livros encontrados:', { livros })
-      this.livros = livros
-    },
+  async listarLivros() {
+    const livros = await api.listarLivros()
+    console.log('Livros:', { livros })
+    // Inicializar novaNota para cada livro
+    this.livros = livros
   },
+  async buscarLivro() {
+    const { pesquisa } = this
+    const livros = await api.buscarLivros(pesquisa)
+    console.log('Livros encontrados:', { livros })
+    this.livros = livros
+  },
+  async avaliarLivro(livro) {
+    if (!livro.novaNota || livro.novaNota < 1 || livro.novaNota > 5) {
+      alert('Por favor, insira uma nota válida de 1 a 5.')
+      return
+    }
+
+    try {
+      await api.enviarReview({
+        isbn: livro.isbn,
+        rating: livro.novaNota,
+      })
+
+      alert('Avaliação enviada! Obrigado.')
+
+      // Aqui você poderia recarregar a lista para atualizar a média:
+      this.listarLivros()
+
+    } catch (error) {
+      console.error('Erro ao enviar avaliação:', error)
+      alert('Erro ao enviar avaliação.')
+    }
+  }
+},
   mounted() {
     // esse método é chamado assim que o componente é montado em tela
     // é chamado apenas uma vez
@@ -73,6 +95,21 @@ export default {
             }}
           </p>
         </RouterLink>
+
+        <!-- Aqui começa a parte nova -->
+        <p class="average-rating">
+          <strong>Média de notas:</strong>
+          {{ livro.averageRating ? livro.averageRating.toFixed(1) : 'Sem avaliações' }}
+        </p>
+
+        <form @submit.prevent="avaliarLivro(livro)">
+          <label>
+            Sua nota:
+            <input type="number" v-model.number="livro.novaNota" min="1" max="5" required />
+          </label>
+          <button type="submit">Avaliar</button>
+        </form>
+        <!-- Aqui termina a parte nova -->
       </li>
     </ul>
   </main>
@@ -146,5 +183,24 @@ ul {
       }
     }
   }
+}
+
+.average-rating {
+  margin-top: 0.5em;
+  font-size: 1em;
+  color: #333;
+}
+
+form {
+  margin-top: 0.5em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+form input[type="number"] {
+  width: 5em;
+}
+form button {
+  align-self: flex-start;
 }
 </style>
