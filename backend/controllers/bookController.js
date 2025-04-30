@@ -18,7 +18,18 @@ exports.findOrList = async (req, res) => {
       ? await Book.find(search)
       : await Book.getAll();
 
-    res.json(books);
+
+    const booksWithRatings = await Promise.all(
+      books.map(async (book) => {
+          const avgResult = await Book.getAverageRating(book.id);
+          const result=  {
+            ...book,
+            averageRating: avgResult?.averageRating ? Number(avgResult.averageRating) : null,
+          }
+          return result ;
+        })
+      );
+    res.json(booksWithRatings);
   } catch (err) {
     res.status(500).json({ error: 'Erro ao buscar livros' });
   }

@@ -24,6 +24,7 @@ app.get('/', (req, res) => res.send('Hello World'));
 // USERS
 app.get('/users', userController.list);
 app.post('/users', userController.create);
+
 app.delete('/users/:id', userController.delete);
 
 // BOOKS
@@ -31,6 +32,10 @@ app.get('/books', bookController.findOrList);
 app.post('/books', bookController.create);
 app.delete('/books/:id', bookController.delete);
 
+// REVIEWS
+app.get('/reviews/:id', reviewController.listById);
+app.get('/reviews/book/:id', reviewController.listByBookId);
+app.post('/reviews', reviewController.create);
 // Outros endpoints de livros, reviews, etc virão aqui...
 
 app.listen(3000, "localhost", () => {

@@ -29,19 +29,19 @@ export default {
     },
   },
   methods: {
-    // aqui você pode criar métodos que podem ser chamados em qualquer lugar
-    async listarLivros() {
-      const livros = await api.listarLivros()
-      console.log('Livros:', { livros })
-      this.livros = livros
-    },
-    async buscarLivro() {
-      const { pesquisa } = this
-      const livros = await api.buscarLivros(pesquisa)
-      console.log('Livros encontrados:', { livros })
-      this.livros = livros
-    },
+  async listarLivros() {
+    const livros = await api.listarLivros()
+    console.log('Livros:', { livros })
+    // Inicializar novaNota para cada livro
+    this.livros = livros
   },
+  async buscarLivro() {
+    const { pesquisa } = this
+    const livros = await api.buscarLivros(pesquisa)
+    console.log('Livros encontrados:', { livros })
+    this.livros = livros
+  }
+},
   mounted() {
     // esse método é chamado assim que o componente é montado em tela
     // é chamado apenas uma vez
@@ -58,7 +58,7 @@ export default {
     </section>
 
     <h2>Lista de livros ({{ numeroLivros }})</h2>
-    <ul>
+    <ul v-if="livros && livros.length > 0">
       <li v-for="livro in livros" :key="livro.isbn">
         <RouterLink :to="`/livro/${livro.isbn}`">
           <img class="cover" :src="livro.cover" alt="Capa do livro" />
@@ -73,12 +73,38 @@ export default {
             }}
           </p>
         </RouterLink>
+
+        <p class="average-rating">
+          <div class="rating" v-if="livro.averageRating">
+            <span>{{ livro.averageRating ? livro.averageRating.toFixed(1) : 'Sem avaliações' }}</span>
+            <span :class="{'fa fa-star': true, 'checked': livro.averageRating >= 1}"></span>
+            <span :class="{'fa fa-star': true, 'checked': livro.averageRating >= 2}"></span>
+            <span :class="{'fa fa-star': true, 'checked': livro.averageRating >= 3}"></span>
+            <span :class="{'fa fa-star': true, 'checked': livro.averageRating >= 4}"></span>
+            <span :class="{'fa fa-star': true, 'checked': livro.averageRating >= 5}"></span>
+          </div>
+        </p>
       </li>
     </ul>
   </main>
 </template>
 
 <style>
+.checked {
+  color: orange;
+}
+.rating {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5em;
+  :first-child {
+    border: 1px solid orange;
+    border-radius: 0.5em;
+    padding: 0.5em;
+    background: rgba(241, 90, 34, 0.05);
+  }
+}
 section {
   display: flex;
   justify-content: start;
@@ -146,5 +172,24 @@ ul {
       }
     }
   }
+}
+
+.average-rating {
+  margin-top: 0.5em;
+  font-size: 1em;
+  color: #333;
+}
+
+form {
+  margin-top: 0.5em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+form input[type="number"] {
+  width: 5em;
+}
+form button {
+  align-self: flex-start;
 }
 </style>
