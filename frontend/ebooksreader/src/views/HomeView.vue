@@ -40,28 +40,6 @@ export default {
     const livros = await api.buscarLivros(pesquisa)
     console.log('Livros encontrados:', { livros })
     this.livros = livros
-  },
-  async avaliarLivro(livro) {
-    if (!livro.novaNota || livro.novaNota < 1 || livro.novaNota > 5) {
-      alert('Por favor, insira uma nota válida de 1 a 5.')
-      return
-    }
-
-    try {
-      await api.enviarReview({
-        isbn: livro.isbn,
-        rating: livro.novaNota,
-      })
-
-      alert('Avaliação enviada! Obrigado.')
-
-      // Aqui você poderia recarregar a lista para atualizar a média:
-      this.listarLivros()
-
-    } catch (error) {
-      console.error('Erro ao enviar avaliação:', error)
-      alert('Erro ao enviar avaliação.')
-    }
   }
 },
   mounted() {
@@ -80,7 +58,7 @@ export default {
     </section>
 
     <h2>Lista de livros ({{ numeroLivros }})</h2>
-    <ul>
+    <ul v-if="livros && livros.length > 0">
       <li v-for="livro in livros" :key="livro.isbn">
         <RouterLink :to="`/livro/${livro.isbn}`">
           <img class="cover" :src="livro.cover" alt="Capa do livro" />
@@ -96,26 +74,37 @@ export default {
           </p>
         </RouterLink>
 
-        <!-- Aqui começa a parte nova -->
         <p class="average-rating">
-          <strong>Média de notas:</strong>
-          {{ livro.averageRating ? livro.averageRating.toFixed(1) : 'Sem avaliações' }}
+          <div class="rating" v-if="livro.averageRating">
+            <span>{{ livro.averageRating ? livro.averageRating.toFixed(1) : 'Sem avaliações' }}</span>
+            <span :class="{'fa fa-star': true, 'checked': livro.averageRating >= 1}"></span>
+            <span :class="{'fa fa-star': true, 'checked': livro.averageRating >= 2}"></span>
+            <span :class="{'fa fa-star': true, 'checked': livro.averageRating >= 3}"></span>
+            <span :class="{'fa fa-star': true, 'checked': livro.averageRating >= 4}"></span>
+            <span :class="{'fa fa-star': true, 'checked': livro.averageRating >= 5}"></span>
+          </div>
         </p>
-
-        <form @submit.prevent="avaliarLivro(livro)">
-          <label>
-            Sua nota:
-            <input type="number" v-model.number="livro.novaNota" min="1" max="5" required />
-          </label>
-          <button type="submit">Avaliar</button>
-        </form>
-        <!-- Aqui termina a parte nova -->
       </li>
     </ul>
   </main>
 </template>
 
 <style>
+.checked {
+  color: orange;
+}
+.rating {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5em;
+  :first-child {
+    border: 1px solid orange;
+    border-radius: 0.5em;
+    padding: 0.5em;
+    background: rgba(241, 90, 34, 0.05);
+  }
+}
 section {
   display: flex;
   justify-content: start;

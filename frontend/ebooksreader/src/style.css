@@ -9,6 +9,28 @@ body {
     background-color: #f4f4f4;
     color: #333;
     padding: 1rem;
+
+    --clr-theme: #165193;
+    --clr-theme-light: #1a6bb8;
+    --clr-theme-dark: #0f3c6b;
+
+    --clr-text: #333;
+    --clr-text-light: #666;
+    --clr-text-dark: #000;
+
+    --clr-bg: #f4f4f4;
+    --clr-bg-light: #fff;
+    --clr-bg-dark: #eaeaea;
+
+    --clr-border: #ccc;
+    --clr-border-light: #ddd;
+    --clr-border-dark: #bbb;
+
+    background: var(--clr-bg);
+    color: var(--clr-text);
+    font-size: 1rem;
+    line-height: 1.5;
+    font-weight: 400;
 }
 
 input {

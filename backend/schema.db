@@ -30,12 +30,14 @@ CREATE TABLE IF NOT EXISTS reviews (
     FOREIGN KEY (book_id) REFERENCES books(id)
 );
 
-CREATE TABLE IF NOT EXISTS userreviews (
+CREATE TABLE IF NOT EXISTS userreviews_new (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    book_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,
     review_id INTEGER NOT NULL,
-    FOREIGN KEY (book_id) REFERENCES books(id),
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (review_id) REFERENCES reviews(id)
 );
+
+DROP TABLE userreviews;
+
+ALTER TABLE userreviews_new RENAME TO userreviews;

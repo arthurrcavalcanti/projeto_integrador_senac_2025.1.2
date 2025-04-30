@@ -26,10 +26,34 @@ export const adicionarLivro = async (livro) => {
     console.log(resultado);
 }
 
+export const enviarReview = async (livro) => {
+    console.log("Chamando api de adicionar livro");
+    const resultado = await fetch(`${address}/reviews`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(livro)
+    });
+
+    console.log(resultado);
+}
+
+export const listarReviews = async (id) => {
+    console.log("Chamando api de listar reviews");
+    const resultado = await fetch(`${address}/reviews/book/${id}`);
+    return await resultado.json();
+}
+
 const api = {
+    // BOOKS
     listarLivros,
     adicionarLivro,
-    buscarLivros
+    buscarLivros,
+
+    // REVIEWS
+    enviarReview,
+    listarReviews
 }
 
 export default api;
