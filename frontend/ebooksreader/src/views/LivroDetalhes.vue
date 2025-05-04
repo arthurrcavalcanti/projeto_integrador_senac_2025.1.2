@@ -15,6 +15,8 @@ export default {
             star3: false,
             star4: false,
             star5: false,
+
+            usuario: undefined,
         }
     },
     methods: {
@@ -38,7 +40,8 @@ export default {
                 await api.enviarReview({
                     book_id: livro.id,
                     rating: rating,
-                    content: content
+                    content: content,
+                    user_id: this.usuario.id
                 })
                 alert('Avaliação enviada! Obrigado.')
             } catch (error) {
@@ -47,7 +50,7 @@ export default {
             }
             
             // Aqui você poderia recarregar a lista para atualizar a média:
-            this.listarLivros()
+            this.buscarLivro()
         },
         async listarReviews() {
             const {livro} = this;
@@ -74,6 +77,15 @@ export default {
         console.log("LivroDetalhes Montado");
         console.log("ID do livro:", this.id);
         this.buscarLivro();
+        const logado = sessionStorage.getItem("logado");
+        if(logado) {
+            const user = JSON.parse(sessionStorage.getItem("user"));
+            if(user) {
+                console.log("Montado, usuário: ", {user});
+                this.usuario = user;
+            }
+        }
+        
     }
 }
 </script>
@@ -108,6 +120,7 @@ export default {
                 </form>
 
         <div class="review-lista" v-for="review in reviews" :key="review.id">
+            <h4>{{review.user.name}}</h4>
             <div class="rating-detalhes" v-if="review.rating">
                 <span>{{ review.rating }}</span>
                 <span :class="{'fa fa-star': true, 'checked': review.rating >= 1}"></span>

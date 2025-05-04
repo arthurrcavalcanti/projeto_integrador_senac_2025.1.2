@@ -13,7 +13,7 @@ const corsOptions = {
   origin: '*',
   methods: ['GET', 'POST', 'DELETE'],
   allowedHeaders: ['Content-Type'],
-  credentials: true
+  credentials: false
 };
 
 app.use(cors(corsOptions));
@@ -24,7 +24,7 @@ app.get('/', (req, res) => res.send('Hello World'));
 // USERS
 app.get('/users', userController.list);
 app.post('/users', userController.create);
-
+app.post('/users/login', userController.login);
 app.delete('/users/:id', userController.delete);
 
 // BOOKS

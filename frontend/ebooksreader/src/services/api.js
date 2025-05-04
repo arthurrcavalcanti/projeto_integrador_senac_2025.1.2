@@ -45,6 +45,37 @@ export const listarReviews = async (id) => {
     return await resultado.json();
 }
 
+export const criarUsuario = async (usuario) => {
+    console.log("Chamando api de criar usuario");
+    const resultado = await fetch(`${address}/users`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(usuario)
+    });
+
+    console.log(resultado);
+    return resultado;
+}
+
+export const loginUsuario = async (usuario) => {
+    console.log("Chamando api de login usuario");
+    const resultado = await fetch(`${address}/users/login`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(usuario)
+    });
+
+    return resultado;
+}
+
+export const buscarUsuario = async(usuario) => {
+
+}
+
 const api = {
     // BOOKS
     listarLivros,
@@ -53,7 +84,13 @@ const api = {
 
     // REVIEWS
     enviarReview,
-    listarReviews
+    listarReviews,
+
+
+    // USERS
+    criarUsuario,
+    loginUsuario,
+    buscarUsuario
 }
 
 export default api;
