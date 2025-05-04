@@ -69,7 +69,7 @@ import api from "./services/api.js";
         logout() {
           this.logado = false;
           sessionStorage.removeItem("logado");
-          sessionStorage.removeItem("user_id");
+          sessionStorage.removeItem("user");
           console.log("Deslogado");
         }
     },
@@ -103,6 +103,7 @@ import api from "./services/api.js";
       <!-- criar form de login ou criação de conta -->
       <h2>Login</h2>
       <input type="text" placeholder="Email" v-model="email" />
+      <!-- Senha dos usuários teste é 123456 -->
       <input type="password" placeholder="Senha" v-model="senha" />
       <aside>
         <button type="submit">Logar</button>
