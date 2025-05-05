@@ -123,7 +123,7 @@ export default {
       <a href="https://openlibrary.org/" target="_blank">https://openlibrary.org/</a>
     </p>
   </header>
-  <main>
+  <main class="addLivros">
     <form v-on:submit.prevent="adicionarLivro" class="adding-form">
       <!-- icone da fontawesome -->
       <label for="isbn"
@@ -144,31 +144,75 @@ export default {
       <label for="cover">Capa</label>
       <input type="text" id="cover" v-model="cover" placeholder="Digite a url para capa do livro" />
 
+      <img v-if="cover" :src="cover" alt="Capa do livro" />
+
       <button type="submit">Adicionar</button>
     </form>
   </main>
 </template>
 
 <style>
+header {
+  text-align: center;
+  margin-bottom: 2em;
+}
+
+.addLivros {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 2em;
+}
+
 .adding-form {
   display: flex;
   flex-direction: column;
-  gap: 1em;
-  margin-block: 1em;
-  width: 20em;
-  label {
-    font-weight: 700;
-    margin-block-end: -0.5em;
-  }
+  gap: 1.2em;
+  width: 100%;
+  max-width: 30em;
+  background-color: #f9f9f9;
+  padding: 2em;
+  border-radius: 0.8em;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
 
-  textarea {
-    height: 10em;
-  }
+.adding-form label {
+  font-weight: bold;
+  color: #333;
+}
 
-  button {
-    padding: 0.5em 1em;
-  }
-  padding-block-end: 1em;
-  border-block-end: 1px solid #ccc;
+.adding-form input,
+.adding-form textarea {
+  padding: 0.75em;
+  border: 1px solid #ccc;
+  border-radius: 0.5em;
+  font-size: 1em;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.adding-form textarea {
+  resize: vertical;
+  min-height: 8em;
+}
+
+.adding-form button {
+  background-color: #007bff;
+  color: white;
+  padding: 0.75em 1em;
+  font-size: 1em;
+  border: none;
+  border-radius: 0.5em;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.adding-form button:hover {
+  background-color: #0056b3;
+}
+
+.adding-form img {
+  max-width: 100%;
+  border-radius: 0.5em;
 }
 </style>
