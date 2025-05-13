@@ -5,10 +5,11 @@
 }
   
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Calibri', sans-serif;
     background-color: #f4f4f4;
     color: #333;
-    padding: 1rem;
+    margin: 0;
+    padding: 2rem;
 
     --clr-theme: #165193;
     --clr-theme-light: #1a6bb8;
