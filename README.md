@@ -16,9 +16,8 @@
 
 ## Descrição do Projeto
 
-> *(Descreva aqui brevemente qual é o objetivo do projeto, qual problema ele resolve, para quem é destinado, etc.)*
-
----
+--
+O objetivo deste projeto é incentivar pessoas de todas as idades a desenvolverem o hábito da leitura, tornando essa prática divertida e recompensadora. Utilizamos a gamificação como um dos recursos, mas valorizamos principalmente a qualidade que a leitura proporciona. Acreditamos que a verdadeira recompensa está no próprio processo: queremos que os leitores se sintam motivados e satisfeitos por ler.
 
 ## Prova de Conceito Desenvolvida
 
