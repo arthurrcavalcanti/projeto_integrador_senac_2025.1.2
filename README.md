@@ -6,10 +6,11 @@
 
 ## Integrantes do Grupo
 
-- Nome completo 1 
-- Nome completo 2 
-- Nome completo 3 
-- Nome completo 4
+- ANA CAROLINE DE OLIVEIRA MELO 
+- ARTHUR RODRIGUES CAVALCANTI
+- LEONARDO DA ROCHA LUCENA
+- PAULO RICARDO CONSOLINI DA SILVA
+- PEDRO LOPES DE OLIVEIRA
 
 ---
 
