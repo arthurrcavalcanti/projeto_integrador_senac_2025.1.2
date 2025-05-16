@@ -67,5 +67,9 @@ O objetivo deste projeto é incentivar pessoas de todas as idades a desenvolvere
 
 ##  Observações finais
 
+Este projeto foi desenvolvido com o objetivo de simular uma plataforma de leitura de livros online. O Readup permite que usuários naveguem, leiam e gerenciem seus livros digitais de forma simples e intuitiva.
 
+Este é um projeto em constante evolução. Novas funcionalidades como incluir livros e adicionar cometários 
+
+Agradecemos a todos que acompanharam e apoiaram o desenvolvimento deste projeto. 
 
