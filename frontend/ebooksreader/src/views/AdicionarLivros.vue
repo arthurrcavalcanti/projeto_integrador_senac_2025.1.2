@@ -11,25 +11,20 @@ export default {
       author: undefined,
       description: undefined,
       cover: undefined,
+      mensagemSucesso: false, // ✅ nova propriedade para exibir o alerta
     }
   },
   watch: {
-    //exemplo de uso do watch de uma propriedade
     isbn(novo, velho) {
-      // se novo == velho, não faz nada
       if (novo === velho) return
-
       console.log('ISBN alterado de', velho, 'para', novo)
       if (novo.length > 7) {
         this.buscarLivroISBN(novo)
       }
     },
   },
-  computed: {},
   methods: {
     async buscarLivroISBN(valor) {
-      // api de consulta da openlibrary
-      // https://openlibrary.org/dev/docs/api/books
       const url = `https://openlibrary.org/isbn/${valor}.json`
       const response = await fetch(url)
       let authorKey = undefined
@@ -38,38 +33,34 @@ export default {
         return
       }
 
-      // verifica se a resposta é ok (status 200)
       if (response.ok) {
         const data = await response.json()
         console.log('Livro encontrado:', { data })
 
         if (data.description) {
           this.description = data.description
-        } else {
-          if (data.works) {
-            const work = data.works[0].key
-            const urlWork = `https://openlibrary.org${work}.json`
-            const responseWork = await fetch(urlWork)
-            if (responseWork.ok) {
-              const dataWork = await responseWork.json()
-              console.log('Work encontrado:', { dataWork })
-              authorKey = dataWork.authors?.[0]?.author?.key
-              if (dataWork.description.value) {
-                this.description = dataWork.description.value
-              } else {
-                this.description = dataWork.description
-              }
+        } else if (data.works) {
+          const work = data.works[0].key
+          const urlWork = `https://openlibrary.org${work}.json`
+          const responseWork = await fetch(urlWork)
+          if (responseWork.ok) {
+            const dataWork = await responseWork.json()
+            console.log('Work encontrado:', { dataWork })
+            authorKey = dataWork.authors?.[0]?.author?.key
+            if (dataWork.description?.value) {
+              this.description = dataWork.description.value
             } else {
-              console.log('Erro ao buscar work:', { responseWork })
+              this.description = dataWork.description
             }
+          } else {
+            console.log('Erro ao buscar work:', { responseWork })
           }
         }
-        this.title = data.title
 
-        this.cover = `https://covers.openlibrary.org/b/id/${data.covers?.[0]}-M.jpg` // -M é médio, -S é pequeno, -L é grande
+        this.title = data.title
+        this.cover = `https://covers.openlibrary.org/b/id/${data.covers?.[0]}-M.jpg`
 
         const author = data.authors?.[0]?.key ?? authorKey
-        // se não encontrar o autor, tenta pegar o primeiro autor da lista de colaboradores
         if (!author) {
           const contributors = data.contributors?.find((c) => c.role == 'Author')?.name
           if (contributors) {
@@ -79,7 +70,6 @@ export default {
 
         if (author) {
           const urlAuthor = `https://openlibrary.org${author}.json`
-
           const responseAuthor = await fetch(urlAuthor)
           if (responseAuthor.ok) {
             const dataAuthor = await responseAuthor.json()
@@ -89,15 +79,10 @@ export default {
         }
       }
     },
+
     async adicionarLivro() {
       const { isbn, title, author, description, cover } = this
-      const livro = {
-        isbn,
-        title,
-        author,
-        description,
-        cover,
-      }
+      const livro = { isbn, title, author, description, cover }
 
       if (!isbn || !title || !author || !description || !cover) {
         alert('Preencha todos os campos')
@@ -105,13 +90,27 @@ export default {
       }
 
       console.log('Adicionando livro:', { livro })
-      api.adicionarLivro(livro)
+      await api.adicionarLivro(livro)
+
+      // ✅ Exibe mensagem de sucesso
+      this.mensagemSucesso = true
+      setTimeout(() => {
+        this.mensagemSucesso = false
+      }, 3000)
+
+      // ✅ Limpa os campos do formulário
+      this.isbn = ''
+      this.title = ''
+      this.author = ''
+      this.description = ''
+      this.cover = ''
     },
   },
   mounted() {
     console.log('Adicionar livros montado')
   },
 }
+
 </script>
 
 <template>
@@ -123,13 +122,19 @@ export default {
       <a href="https://openlibrary.org/" target="_blank">https://openlibrary.org/</a>
     </p>
   </header>
+
   <main class="addLivros">
     <form v-on:submit.prevent="adicionarLivro" class="adding-form">
-      <!-- icone da fontawesome -->
-      <label for="isbn"
-        >Código ISBN
-        <i class="fa fa-info-circle" title="Pesquisa automaticamente na api da openlibrary"></i
-      ></label>
+
+      <!-- ✅ Alerta de sucesso -->
+      <div v-if="mensagemSucesso" class="alert-sucesso">
+        📘 Livro adicionado com sucesso!
+      </div>
+
+      <label for="isbn">
+        Código ISBN
+        <i class="fa fa-info-circle" title="Pesquisa automaticamente na api da openlibrary"></i>
+      </label>
       <input type="text" id="isbn" v-model="isbn" placeholder="Digite o código ISBN do livro" />
 
       <label for="title">Título</label>
@@ -150,6 +155,7 @@ export default {
     </form>
   </main>
 </template>
+
 
 <style>
 header {
@@ -214,5 +220,23 @@ header {
 .adding-form img {
   max-width: 100%;
   border-radius: 0.5em;
+}
+
+.alert-sucesso {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+  padding: 1em;
+  border-radius: 0.5em;
+  margin-bottom: 1em;
+  text-align: center;
+  animation: fadeInOut 3s ease forwards;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { opacity: 0; }
 }
 </style>
