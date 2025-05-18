@@ -79,6 +79,15 @@ Esse comando irá finalmente colocar a aplicação para rodar, sendo assim, irem
 -  [🎥 Clique aqui para assistir](/video-apresentacao/Apresentação%20e%20Tutorial%20ReadUp.mp4)
 -  [🎥 Assista no Youtube!](https://youtu.be/NVzjItX-kz0)
 
+---
+
+## Jornada do Usuário
+link da jornada do usuário 1: ![image](https://github.com/user-attachments/assets/f398f718-a184-49c3-973e-71f10ab33f53)
+
+link da jornada do usuário 2: ![image](https://github.com/user-attachments/assets/84b81608-923f-46e6-9a10-acf868b656fb)
+
+---
+
 ##  Observações finais
 
 Este projeto foi desenvolvido com o objetivo de simular uma plataforma de leitura de livros online. O Readup permite que usuários naveguem, leiam e gerenciem seus livros digitais de forma simples e intuitiva.
