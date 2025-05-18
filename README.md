@@ -76,7 +76,7 @@ Esse comando irá finalmente colocar a aplicação para rodar, sendo assim, irem
 
 ## Vídeo de Apresentação
 
--  [🎥 Clique aqui para assistir]()
+-  [🎥 Clique aqui para assistir](/video-apresentacao/Apresentação%20e%20Tutorial%20ReadUp.mp4)
 
 ##  Observações finais
 
