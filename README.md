@@ -1,7 +1,13 @@
-# Projeto Integrador – 4º Semestre TADS/TSI
+# Projeto Integrador: Desenvolvimento de Sistemas Orientado a Dispositivos Móveis e Baseados na Web – 4º Semestre TADS/TSI
 
 ## ReadUP
 
+O ReadUp representa uma inovação na forma como os jovens interagem com 
+a leitura digital, ao integrar gamificação, personalização e uma interface social. Seu 
+objetivo é incentivar o hábito da leitura, criando uma experiência envolvente e 
+dinâmica que se adapta a diferentes perfis de usuários. A proposta de transformar a 
+leitura em um desafio interativo com recompensas e objetivos claros visa atrair jovens 
+leitores, muitas vezes afastados dos métodos tradicionais.
 ---
 
 ## Integrantes do Grupo
@@ -29,19 +35,19 @@ O objetivo deste projeto é incentivar pessoas de todas as idades a desenvolvere
 
 ### Frontend
 
-- [ ] HTML
-- [ ] CSS
-- [ ] JavaScript
-- [ ] Vue
+- [x] HTML
+- [x] CSS
+- [x] JavaScript
+- [x] Vue
 
 ### Backend
 
-- [ ] JavaScript
-- [ ] Node.js
+- [x] JavaScript
+- [x] Node.js
 
 ### Banco de Dados
 
-- [ ] SQLite
+- [x] SQLite
 
 ---
 
@@ -49,16 +55,28 @@ O objetivo deste projeto é incentivar pessoas de todas as idades a desenvolvere
 
 ### Requisitos
 
-- [ ] Navegador atualizado
-- [ ] Node.js instalado
-- [ ] Git instalado (opcional para clonar o projeto)
+- [x] Navegador atualizado
+- [x] Node.js instalado
+- [x] Git instalado (opcional para clonar o projeto)
 
 ### Passo a passo
 
 1. Clone este repositório:
    ```bash
-   git clone https://github.com/SEU_USUARIO/NOME_DO_REPOSITORIO.git
+   git clone https://github.com/arthurrcavalcanti/projeto_integrador_senac_2025.1.2.git
 
+---
+2.  Após clonar o repositório, e ja tendo instalado o Node.Js na sua máquina, abra o terminal do seu sistema operacional dentro das pastas /backend, e também dentro da pasta /frontend/ebooksreader, e então execute o comando:
+   ```bash
+   npm install
+   ```
+Esse comando é essencial para que todas as bibliotecas utilizadas no projeto sejam instaladas para o correto funcionamento do que foi desenvolvido.
+---
+3.  Após a correta instalação do comando anterior, ainda com ambos terminais abertos, vamos digitar o seguinte comando:
+   ```bash
+   npm run dev
+   ```
+Esse comando irá finalmente colocar a aplicação para rodar, sendo assim, iremos copiar o endereço que o terminal da pasta /frontend/ebooksreader irá gerar e colar em nosso navegador de preferência, podendo enfim usufruir da aplicação!
 ---
 
 ## Vídeo de Apresentação
