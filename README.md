@@ -2,12 +2,8 @@
 
 ## ReadUP
 
-O ReadUp representa uma inovação na forma como os jovens interagem com 
-a leitura digital, ao integrar gamificação, personalização e uma interface social. Seu 
-objetivo é incentivar o hábito da leitura, criando uma experiência envolvente e 
-dinâmica que se adapta a diferentes perfis de usuários. A proposta de transformar a 
-leitura em um desafio interativo com recompensas e objetivos claros visa atrair jovens 
-leitores, muitas vezes afastados dos métodos tradicionais.
+O Readup O ReadUp representa uma inovação na forma como os jovens interagem com a leitura digital, ao integrar gamificação, personalização e uma interface social. Seu objetivo é incentivar o hábito da leitura, criando uma experiência envolvente e dinâmica que se adapta a diferentes perfis de usuários. A proposta de transformar a leitura em um desafio interativo com recompensas e objetivos claros visa atrair jovens leitores, muitas vezes afastados dos métodos tradicionais.
+
 ---
 
 ## Integrantes do Grupo
@@ -22,7 +18,6 @@ leitores, muitas vezes afastados dos métodos tradicionais.
 
 ## Descrição do Projeto
 
----
 O objetivo deste projeto é incentivar pessoas de todas as idades a desenvolverem o hábito da leitura, tornando essa prática divertida e recompensadora. Utilizamos a gamificação como um dos recursos, mas valorizamos principalmente a qualidade que a leitura proporciona. Acreditamos que a verdadeira recompensa está no próprio processo: queremos que os leitores se sintam motivados e satisfeitos por ler.
 
 ## Prova de Conceito Desenvolvida
