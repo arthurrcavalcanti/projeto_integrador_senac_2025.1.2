@@ -22,7 +22,11 @@ O objetivo deste projeto é incentivar pessoas de todas as idades a desenvolvere
 
 ## Prova de Conceito Desenvolvida
 
-> *(Explique qual jornada do projeto foi escolhida para a prova de conceito e o motivo da escolha. Resuma o funcionamento principal da aplicação.)*
+### Jornada 1 - João, 10 Anos:
+![image](https://github.com/user-attachments/assets/f398f718-a184-49c3-973e-71f10ab33f53)
+
+### Jornada 2 - Marina, 16 Anos:
+![image](https://github.com/user-attachments/assets/84b81608-923f-46e6-9a10-acf868b656fb)
 
 ---
 
@@ -78,13 +82,6 @@ Esse comando irá finalmente colocar a aplicação para rodar, sendo assim, irem
 
 -  [🎥 Clique aqui para assistir](/video-apresentacao/Apresentação%20e%20Tutorial%20ReadUp.mp4)
 -  [🎥 Assista no Youtube!](https://youtu.be/NVzjItX-kz0)
-
----
-
-## Jornada do Usuário
-link da jornada do usuário 1: ![image](https://github.com/user-attachments/assets/f398f718-a184-49c3-973e-71f10ab33f53)
-
-link da jornada do usuário 2: ![image](https://github.com/user-attachments/assets/84b81608-923f-46e6-9a10-acf868b656fb)
 
 ---
 
