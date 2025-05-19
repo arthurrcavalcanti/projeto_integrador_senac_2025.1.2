@@ -28,6 +28,28 @@ O objetivo deste projeto é incentivar pessoas de todas as idades a desenvolvere
 ### Jornada 2 - Marina, 16 Anos:
 ![image](https://github.com/user-attachments/assets/84b81608-923f-46e6-9a10-acf868b656fb)
 
+Nessa primeira etapa, decidimos por focar na Jornada 2, de Marina, desenvolvendo um site mais simples e apenas com funções fundamentais para um primeiro funcionamento e interação do usuário, comprovando a viabilidade técnica e experiência de uso.
+
+## Funcionalidades da PoC:
+
+1. Tela de Adição de Livros (com ISBN)
+   - Entrada do código ISBN.
+   - Integração com a Open Library API.
+   - Preenchimento automático do título, autor, descrição e capa (com preview).
+   - Botão para adicionar livro ao sistema (banco de dados).
+   - Feedback de sucesso.
+
+2. Tela de Biblioteca
+   - Listagem dos livros adicionados (vindos do backend).
+   - Exibição da capa, título, autor, descrição e classificação do livro.
+
+3. Interação com Usuários
+   - Visualização de reviews de outros usuários em cada livro.
+   - Possibilidade de escrever trechos do livro junto com a nota.
+
+4. Armazenamento Backend
+   - Integração do Node.Js com SQLite, guardando todos os dados, livros e logins.
+
 ---
 
 ## Tecnologias Utilizadas
@@ -39,14 +61,20 @@ O objetivo deste projeto é incentivar pessoas de todas as idades a desenvolvere
 - [x] JavaScript
 - [x] Vue
 
+Optamos por essa configuração de tecnologias para o frontend de acordo com a experiência pessoal dos integrantes do grupo, além de facilitar o processo para o curto prazo que teríamos para entrega e as funcionalidades que gostaríamos de entregar na primeira entrega. A escolha pelo framework Vue.js se deu pelo fato de ser uma tecnologia de fácil aprendizado e sua componentização, permitindo com que pudéssemos reaproveitar parte do código.
+
 ### Backend
 
 - [x] JavaScript
 - [x] Node.js
 
+Assim como no frontend, para o backend escolhemos ferramentas e tecnologias que conversassem melhor entre si. Portanto, optamos pelo Node.Js, para que dessa forma pudéssemos utilizar nosso conhecimento em JavaScript em todo o projeto.
+
 ### Banco de Dados
 
 - [x] SQLite
+
+Se tratando de um projeto experimental e pequeno nessa primeira fase, precisávamos de um banco de dados simples de gerir e que fosse rápido e eficiente, e além disso, usasse comandos SQL que já estávamos acostumados de outros semestres da faculdade. A solução foi utilizar SQLite, que é gratuíto e fácil de manejar, sendo uma das opções mais leves.
 
 ---
 
