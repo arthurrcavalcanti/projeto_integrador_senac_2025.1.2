@@ -97,18 +97,28 @@ Se tratando de um projeto experimental e pequeno nessa primeira fase, precisáva
    ```bash
    npm install
    ```
+
 Esse comando é essencial para que todas as bibliotecas utilizadas no projeto sejam instaladas para o correto funcionamento do que foi desenvolvido.
+
 ---
+
 3.  Após a correta instalação do comando anterior, ainda com ambos terminais abertos, vamos digitar o seguinte comando:
    ```bash
    npm run dev
    ```
+
 Esse comando irá finalmente colocar a aplicação para rodar, sendo assim, iremos copiar o endereço que o terminal da pasta /frontend/ebooksreader irá gerar e colar em nosso navegador de preferência, podendo enfim usufruir da aplicação!
+
 ---
 
 ## Vídeo de Apresentação
 
--  [🎥 Clique aqui para assistir](/video-apresentacao/Apresentação%20e%20Tutorial%20ReadUp.mp4)
+https://github.com/user-attachments/assets/206ea903-908a-4bd1-9a90-f63baca0a823
+
+-  [🎥 Video de Demonstração!](/video-apresentacao/Vídeo-demonstrativo-do-ReadUp.mp4)
+-  [🎥 Assista no Youtube!](https://www.youtube.com/watch?v=PZVHuY3xETY)
+
+-  [🎥 Video de Tutorial de Uso!](/video-apresentacao/Apresentação%20e%20Tutorial%20ReadUp.mp4)
 -  [🎥 Assista no Youtube!](https://youtu.be/NVzjItX-kz0)
 
 ---
