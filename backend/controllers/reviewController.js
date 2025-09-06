@@ -1,6 +1,6 @@
-const Review = require('../models/reviewModel');
-const User = require('../models/userModel');
-const knex = require('knex')(require('../knexfile').development);
+const Review = require("../models/reviewModel");
+const User = require("../models/userModel");
+const knex = require("knex")(require("../knexfile").development);
 
 exports.list = async (req, res) => {
   const reviews = await Review.getAll();
@@ -22,21 +22,21 @@ exports.listByBookId = async (req, res) => {
     const reviews = await Review.getByBookId(id);
 
     // Formatando usuário e review
-    const reviewsWithUser = reviews.map(review => {
+    const reviewsWithUser = reviews.map((review) => {
       const { user_id, user_name, user_email, ...rest } = review;
       return {
         ...rest,
         user: {
           id: user_id,
           name: user_name,
-          email: user_email
-        }
+          email: user_email,
+        },
       };
     });
 
     console.log("Reviews encontrados: ", { reviewsWithUser, reviews });
 
-    if(!reviewsWithUser || reviewsWithUser?.length == 0) {
+    if (!reviewsWithUser || reviewsWithUser?.length == 0) {
       return res.json(reviews);
     }
 
@@ -47,14 +47,13 @@ exports.listByBookId = async (req, res) => {
   }
 };
 
-
 exports.create = async (req, res) => {
-  const { book_id, content, rating, user_id } = req.body;
+  const { book_id, content, rating, user_id, review_id } = req.body;
   try {
     const user = await User.getById(user_id);
-    if(!user) return res.status(400).json({ error: 'Usuário não encontrado' });
+    if (!user) return res.status(400).json({ error: "Usuário não encontrado" });
 
-    const [id] = await Review.create({ book_id, content, rating });
+    const [id] = await Review.create({ book_id, content, rating, review_id });
     await User.addUserReview(user_id, id);
     res.status(201).json({ id, book_id, content, rating, user_id });
   } catch (err) {

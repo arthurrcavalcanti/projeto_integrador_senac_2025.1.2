@@ -24,16 +24,10 @@ CREATE TABLE IF NOT EXISTS userbooks (
 
 CREATE TABLE IF NOT EXISTS reviews (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    review_id INTEGER NULL,
     book_id INTEGER NOT NULL,
     content TEXT,
     rating INTEGER CHECK(rating >= 1 AND rating <= 5),
-    FOREIGN KEY (book_id) REFERENCES books(id)
-);
-
-CREATE TABLE IF NOT EXISTS userreviews (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
-    review_id INTEGER NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (review_id) REFERENCES reviews(id)
+    FOREIGN KEY (book_id) REFERENCES books(id)
 );

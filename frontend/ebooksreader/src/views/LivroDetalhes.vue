@@ -52,6 +52,26 @@ export default {
             // Aqui você poderia recarregar a lista para atualizar a média:
             this.buscarLivro()
         },
+        async comentar(reviewResponse) {
+            const {livro, content, rating} = this;
+            console.log({reviewResponse})
+            try {
+                await api.enviarReview({
+                    book_id: livro.id,
+                    rating: reviewResponse.rating,
+                    content: reviewResponse.responseMsg,
+                    user_id: this.usuario.id,
+                    review_id: reviewResponse.id
+                })
+                alert('Comentário! Obrigado.')
+            } catch (error) {
+                console.error('Erro ao enviar avaliação:', error)
+                alert('Erro ao enviar avaliação.')
+            }
+            
+            // Aqui você poderia recarregar a lista para atualizar a média:
+            this.buscarLivro()
+        },
         async listarReviews() {
             const {livro} = this;
             if (!livro.id) {
@@ -60,7 +80,12 @@ export default {
             const response = await api.listarReviews(livro.id);
             console.log("Reviews encontrados:", { response });
             if(response){
-                this.reviews = response;
+                this.reviews = response.map(r => {
+                    return {
+                        ...r,
+                        showComents: false
+                    }
+                });
             }
         },
         selectStar(nota) {
@@ -103,23 +128,23 @@ export default {
 
         </div>
         <form class="review-form" @submit.prevent="avaliarLivro">
-                    <h3>Faça seu review</h3>
+            <h3>Faça seu review</h3>
 
-                    <label for="nota">Sua nota</label>
-                    <div class="rating-define">
-                        <span @click="selectStar(1)" :class="{'fa fa-star': true, 'checked': star1}"></span>
-                        <span @click="selectStar(2)" :class="{'fa fa-star': true, 'checked': star2}"></span>
-                        <span @click="selectStar(3)" :class="{'fa fa-star': true, 'checked': star3}"></span>
-                        <span @click="selectStar(4)" :class="{'fa fa-star': true, 'checked': star4}"></span>
-                        <span @click="selectStar(5)" :class="{'fa fa-star': true, 'checked': star5}"></span>
-                    </div>
+            <label for="nota">Sua nota</label>
+            <div class="rating-define">
+                <span @click="selectStar(1)" :class="{'fa fa-star': true, 'checked': star1}"></span>
+                <span @click="selectStar(2)" :class="{'fa fa-star': true, 'checked': star2}"></span>
+                <span @click="selectStar(3)" :class="{'fa fa-star': true, 'checked': star3}"></span>
+                <span @click="selectStar(4)" :class="{'fa fa-star': true, 'checked': star4}"></span>
+                <span @click="selectStar(5)" :class="{'fa fa-star': true, 'checked': star5}"></span>
+            </div>
 
-                    <label for="comentario">Seu Comentário</label>
-                    <textarea id="comentario" v-model="content"></textarea>
-                    <button type="submit">Enviar</button>
-                </form>
+            <label for="comentario">Seu Comentário</label>
+            <textarea id="comentario" v-model="content"></textarea>
+            <button type="submit">Enviar</button>
+        </form>
 
-        <div class="review-lista" v-for="review in reviews" :key="review.id">
+        <div class="review-lista" v-for="review in reviews.filter(r => !r.review_id)" :key="review.id">
             <h4>{{review.user.name}}</h4>
             <div class="rating-detalhes" v-if="review.rating">
                 <span>{{ review.rating }}</span>
@@ -130,6 +155,19 @@ export default {
                 <span :class="{'fa fa-star': true, 'checked': review.rating >= 5}"></span>
             </div>
             <p><strong>Comentário:</strong> {{ review.content }}</p>
+            <button v-on:click.prevent="() => review.showComents = !review.showComents">{{review.showComents ? 'Esconder' : 'Mostrar'}} comentários</button>
+            <div class="comments" v-if="review.showComents">
+                <div class="comment" v-for="comment in reviews.filter(r => r.review_id == review.id)">
+                    <p>{{ comment.user.name }}</p>
+                    <p><strong>Comentário:</strong> {{ comment.content }}</p>
+                </div>
+                <form v-on:submit.prevent="comentar(review)">
+                    <label for="comentario">Seu Comentário</label>
+                    <textarea id="comentario" v-model="review.responseMsg"></textarea>
+                    <button type="submit">Comentar</button>
+                </form>
+            </div>
+            
         </div>
     </div>
 </template>
@@ -218,5 +256,15 @@ export default {
     gap: 1em
 }
 
+.comments {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+.comment {
+    background: rgb(212, 249, 252);
+    padding: 0.5em;
+    border-radius: 0.5em;
+}
 
 </style>
