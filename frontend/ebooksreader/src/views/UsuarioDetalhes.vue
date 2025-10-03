@@ -10,15 +10,56 @@ export default {
       newusername: '',
       newemail: '',
       newpassword: '',
+      imagePreview: null,
+      imageFile: null,
     }
   },
   methods: {
+    onFileChange(e) {
+      const file = e.target.files[0]
+      this.imageFile = file
+      if (file) {
+        const reader = new FileReader()
+        reader.onload = (ev) => {
+          this.imagePreview = ev.target.result
+        }
+        reader.readAsDataURL(file)
+      } else {
+        this.imagePreview = null
+      }
+    },
+
+    async atualizarImagem() {
+      if (!this.imageFile) return
+      try {
+        const formData = new FormData()
+        formData.append('id', this.usuario.id)
+        formData.append('name', this.usuario.name)
+        formData.append('email', this.usuario.email)
+        if (this.usuario.password) {
+          formData.append('password', this.usuario.password)
+        }
+        formData.append('image', this.imageFile)
+        const atualizado = await atualizarUsuario(formData, true)
+        this.usuario = atualizado
+        sessionStorage.setItem('user', JSON.stringify(atualizado))
+        this.imagePreview = null
+        this.imageFile = null
+      } catch (err) {
+        console.error('Erro ao atualizar imagem:', err.message)
+      }
+    },
+
     async atualizarNome() {
       try {
-        const atualizado = await atualizarUsuario({
-          ...this.usuario,
-          name: this.newusername || this.usuario.name,
-        })
+        const formData = new FormData()
+        formData.append('id', this.usuario.id)
+        formData.append('name', this.newusername || this.usuario.name)
+        formData.append('email', this.usuario.email)
+        if (this.usuario.password) {
+          formData.append('password', this.usuario.password)
+        }
+        const atualizado = await atualizarUsuario(formData, true)
         this.usuario = atualizado
         sessionStorage.setItem('user', JSON.stringify(atualizado))
         this.usuario.editarNome = false
@@ -27,12 +68,17 @@ export default {
         console.error('Erro ao atualizar nome:', err.message)
       }
     },
+
     async atualizarEmail() {
       try {
-        const atualizado = await atualizarUsuario({
-          ...this.usuario,
-          email: this.newemail || this.usuario.email,
-        })
+        const formData = new FormData()
+        formData.append('id', this.usuario.id)
+        formData.append('name', this.usuario.name)
+        formData.append('email', this.newemail || this.usuario.email)
+        if (this.usuario.password) {
+          formData.append('password', this.usuario.password)
+        }
+        const atualizado = await atualizarUsuario(formData, true)
         this.usuario = atualizado
         sessionStorage.setItem('user', JSON.stringify(atualizado))
         this.usuario.editarEmail = false
@@ -41,12 +87,15 @@ export default {
         console.error('Erro ao atualizar email:', err.message)
       }
     },
+
     async atualizarSenha() {
       try {
-        const atualizado = await atualizarUsuario({
-          ...this.usuario,
-          password: this.newpassword,
-        })
+        const formData = new FormData()
+        formData.append('id', this.usuario.id)
+        formData.append('name', this.usuario.name)
+        formData.append('email', this.usuario.email)
+        formData.append('password', this.newpassword)
+        const atualizado = await atualizarUsuario(formData, true)
         this.usuario = atualizado
         sessionStorage.setItem('user', JSON.stringify(atualizado))
         this.usuario.editarSenha = false
@@ -79,7 +128,24 @@ export default {
   <main v-if="usuario">
     <h2>Meu perfil</h2>
 
-    <!-- Nome -->
+    <!-- Imagem de perfil -->
+    <div>
+      <label>Foto de perfil:</label>
+      <img
+        v-if="imagePreview"
+        :src="imagePreview"
+        alt="Preview"
+        style="max-width: 120px; max-height: 120px; border-radius: 50%"
+      />
+      <img
+        v-else-if="usuario.imageUrl"
+        :src="usuario.imageUrl"
+        alt="Foto de perfil"
+        style="max-width: 120px; max-height: 120px; border-radius: 50%"
+      />
+      <input type="file" @change="onFileChange" accept="image/*" />
+      <button v-if="imageFile" @click.prevent="atualizarImagem">Salvar foto</button>
+    </div>
     <div>
       <label>Nome:</label>
       <span v-if="!usuario.editarNome">{{ usuario.name }}</span>
@@ -164,5 +230,8 @@ label {
 
 input {
   margin-right: 0.5rem;
+}
+img {
+  margin-top: 0.5rem;
 }
 </style>

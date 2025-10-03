@@ -1,13 +1,36 @@
 const User = require("../models/userModel");
 const bcrypt = require("bcrypt");
+const multer = require("multer");
+
+// Configuração do multer para armazenar o arquivo em memória
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+// Middleware para upload de imagem
+exports.uploadImageMiddleware = upload.single("image");
 
 exports.list = async (req, res) => {
   const users = await User.getAll();
   res.json(users);
 };
 
+exports.getImage = async (req, res) => {
+  const { id } = req.params;
+  const user = await User.getById(id);
+  if (user && user.image) {
+    res.set("Content-Type", "image/png"); // ajuste o tipo se necessário
+    res.send(user.image);
+  } else {
+    res.status(404).send();
+  }
+};
+
 exports.create = async (req, res) => {
   const { name, email, password } = req.body;
+  let imageBuffer = null;
+  if (req.file) {
+    imageBuffer = req.file.buffer;
+  }
   console.log("Tentando criar usuario", { name, email });
   try {
     const existingUser = await User.getByEmail(email);
@@ -16,7 +39,12 @@ exports.create = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const [id] = await User.create({ name, email, password: hashedPassword });
+    const [id] = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      image: imageBuffer,
+    });
 
     console.log("Usuario criado com sucesso", { id, name, email });
     res.status(201).json({ id, name, email });
@@ -27,36 +55,42 @@ exports.create = async (req, res) => {
 };
 
 exports.update = async (req, res) => {
-  const { usuario } = req.body;
-  console.log("Tentando atualizar usuário", { usuario });
+  // Pegue os campos diretamente de req.body
+  const { id, name, email, password } = req.body;
+  let imageBuffer = null;
+  if (req.file) {
+    imageBuffer = req.file.buffer;
+  }
+  console.log("Tentando atualizar usuário", { id, name, email });
 
   try {
-    if (!usuario.id) {
+    if (!id) {
       return res.status(400).json({ error: "ID do usuário é obrigatório" });
     }
 
     // Checando se email já foi tomado por outro usuário
-    if (usuario.email) {
-      const existingUser = await User.getByEmail(usuario.email);
-      if (existingUser && existingUser.id !== usuario.id) {
+    if (email) {
+      const existingUser = await User.getByEmail(email);
+      if (existingUser && existingUser.id !== Number(id)) {
         return res.status(400).json({ error: "Esse email já foi cadastrado" });
       }
     }
 
     const updateData = {
-      name: usuario.name,
-      email: usuario.email,
+      name,
+      email,
     };
 
-    if (usuario.password) {
-      updateData.password = await bcrypt.hash(usuario.password, 10);
+    if (password) {
+      updateData.password = await bcrypt.hash(password, 10);
+    }
+    if (imageBuffer) {
+      updateData.image = imageBuffer;
     }
 
-    // Run update
-    await User.update(usuario.id, updateData);
+    await User.update(id, updateData);
 
-    // Fetch updated user to return
-    const updatedUser = await User.getById(usuario.id);
+    const updatedUser = await User.getById(id);
 
     console.log("Usuário atualizado com sucesso", updatedUser);
     res.status(200).json(updatedUser);
