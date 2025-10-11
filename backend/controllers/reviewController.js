@@ -21,7 +21,6 @@ exports.listByBookId = async (req, res) => {
   try {
     const reviews = await Review.getByBookId(id);
 
-    // Formatando usuário e review
     const reviewsWithUser = reviews.map((review) => {
       const { user_id, user_name, user_email, ...rest } = review;
       return {
@@ -63,6 +62,15 @@ exports.create = async (req, res) => {
 
 exports.delete = async (req, res) => {
   const { id } = req.params;
-  await Review.remove(id);
-  res.status(204).send();
+  try {
+    const deleted = await Review.removeCascade(id);
+    if (!deleted)
+      return res.status(404).json({ error: "Review não encontrada" });
+    return res.status(204).send();
+  } catch (err) {
+    console.error("Falha ao deletar review", err);
+    return res
+      .status(400)
+      .json({ error: err.message || "Erro ao deletar review" });
+  }
 };

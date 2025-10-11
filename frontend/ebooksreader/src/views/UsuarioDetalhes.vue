@@ -1,6 +1,6 @@
 <script>
 // importa a chamada da API
-import { atualizarUsuario } from '../services/api.js'
+import { atualizarUsuario, buscarImagemUsuario } from '../services/api.js'
 
 export default {
   props: [],
@@ -15,6 +15,7 @@ export default {
     }
   },
   methods: {
+    buscarImagemUsuario,
     onFileChange(e) {
       const file = e.target.files[0]
       this.imageFile = file
@@ -125,113 +126,294 @@ export default {
 </script>
 
 <template>
-  <main v-if="usuario">
-    <h2>Meu perfil</h2>
+  <main v-if="usuario" class="perfil-container">
+    <h2 class="perfil-titulo">Meu Perfil</h2>
 
-    <!-- Imagem de perfil -->
-    <div>
-      <label>Foto de perfil:</label>
-      <img
-        v-if="imagePreview"
-        :src="imagePreview"
-        alt="Preview"
-        style="max-width: 120px; max-height: 120px; border-radius: 50%"
-      />
-      <img
-        v-else-if="usuario.imageUrl"
-        :src="usuario.imageUrl"
-        alt="Foto de perfil"
-        style="max-width: 120px; max-height: 120px; border-radius: 50%"
-      />
-      <input type="file" @change="onFileChange" accept="image/*" />
-      <button v-if="imageFile" @click.prevent="atualizarImagem">Salvar foto</button>
-    </div>
-    <div>
-      <label>Nome:</label>
-      <span v-if="!usuario.editarNome">{{ usuario.name }}</span>
-      <input
-        v-if="usuario.editarNome"
-        type="text"
-        v-model="newusername"
-        :placeholder="usuario.name"
-      />
-      <button v-if="!usuario.editarNome" @click.prevent="usuario.editarNome = true" title="Editar">
-        <i class="fas fa-edit"></i>
-      </button>
-      <button v-if="usuario.editarNome" @click.prevent="atualizarNome">Atualizar</button>
-      <button
-        v-if="usuario.editarNome"
-        @click.prevent="() => (usuario.editarNome = !usuario.editarNome)"
-      >
-        Cancelar
-      </button>
-    </div>
+    <!-- Foto -->
+    <section class="perfil-card perfil-foto">
+      <div class="foto-wrapper relative">
+        <img v-if="imagePreview" :src="imagePreview" alt="Preview da foto" class="foto-perfil" />
+        <img
+          v-else-if="usuario && usuario.id"
+          :src="buscarImagemUsuario(usuario.id)"
+          alt="Foto de perfil"
+          class="foto-perfil"
+        />
+      </div>
 
-    <!-- Email -->
-    <div>
-      <label>Email:</label>
-      <span v-if="!usuario.editarEmail">{{ usuario.email }}</span>
-      <input
-        v-if="usuario.editarEmail"
-        type="email"
-        v-model="newemail"
-        :placeholder="usuario.email"
-      />
-      <button
-        v-if="!usuario.editarEmail"
-        @click.prevent="usuario.editarEmail = true"
-        title="Editar"
-      >
-        <i class="fas fa-edit"></i>
-      </button>
-      <button v-if="usuario.editarEmail" @click.prevent="atualizarEmail">Atualizar</button>
-      <button
-        v-if="usuario.editarEmail"
-        @click.prevent="() => (usuario.editarEmail = !usuario.editarEmail)"
-      >
-        Cancelar
-      </button>
-    </div>
+      <!-- Botão de trocar foto -->
+      <label class="botao-trocar-foto">
+        <i class="fas fa-camera"></i>
+        <span>Trocar foto</span>
+        <input type="file" @change="onFileChange" accept="image/*" hidden />
+      </label>
 
-    <!-- Senha -->
-    <div>
-      <label>Senha:</label>
-      <span v-if="!usuario.editarSenha">********</span>
-      <input v-if="usuario.editarSenha" type="password" v-model="newpassword" />
-      <button
-        v-if="!usuario.editarSenha"
-        @click.prevent="usuario.editarSenha = true"
-        title="Editar"
-      >
-        <i class="fas fa-edit"></i>
-      </button>
-      <button v-if="usuario.editarSenha" @click.prevent="atualizarSenha">Atualizar</button>
-      <button
-        v-if="usuario.editarSenha"
-        @click.prevent="() => (usuario.editarSenha = !usuario.editarSenha)"
-      >
-        Cancelar
-      </button>
-    </div>
+      <!-- Botão de salvar aparece somente quando há nova imagem -->
+      <button v-if="imageFile" class="botao-salvar" @click.prevent="atualizarImagem">Salvar</button>
+    </section>
+
+    <!-- Dados -->
+    <section class="perfil-card">
+      <!-- Nome -->
+      <div class="campo-perfil">
+        <label class="campo-label">Nome</label>
+        <template v-if="!usuario.editarNome">
+          <span class="campo-valor">{{ usuario.name }}</span>
+          <button class="botao-icone" @click.prevent="usuario.editarNome = true">
+            <i class="fas fa-edit"></i>
+          </button>
+        </template>
+        <template v-else>
+          <input type="text" v-model="newusername" :placeholder="usuario.name" />
+          <div class="acoes-edicao">
+            <button class="botao-primario" @click.prevent="atualizarNome">Salvar</button>
+            <button class="botao-secundario" @click.prevent="usuario.editarNome = false">
+              Cancelar
+            </button>
+          </div>
+        </template>
+      </div>
+
+      <!-- Email -->
+      <div class="campo-perfil">
+        <label class="campo-label">Email</label>
+        <template v-if="!usuario.editarEmail">
+          <span class="campo-valor">{{ usuario.email }}</span>
+          <button class="botao-icone" @click.prevent="usuario.editarEmail = true">
+            <i class="fas fa-edit"></i>
+          </button>
+        </template>
+        <template v-else>
+          <input type="email" v-model="newemail" :placeholder="usuario.email" />
+          <div class="acoes-edicao">
+            <button class="botao-primario" @click.prevent="atualizarEmail">Salvar</button>
+            <button class="botao-secundario" @click.prevent="usuario.editarEmail = false">
+              Cancelar
+            </button>
+          </div>
+        </template>
+      </div>
+
+      <!-- Senha -->
+      <div class="campo-perfil">
+        <label class="campo-label">Senha</label>
+        <template v-if="!usuario.editarSenha">
+          <span class="campo-valor">********</span>
+          <button class="botao-icone" @click.prevent="usuario.editarSenha = true">
+            <i class="fas fa-edit"></i>
+          </button>
+        </template>
+        <template v-else>
+          <input type="password" v-model="newpassword" placeholder="Nova senha" />
+          <div class="acoes-edicao">
+            <button class="botao-primario" @click.prevent="atualizarSenha">Salvar</button>
+            <button class="botao-secundario" @click.prevent="usuario.editarSenha = false">
+              Cancelar
+            </button>
+          </div>
+        </template>
+      </div>
+    </section>
   </main>
 </template>
 
 <style scoped>
-main {
+/* Container geral */
+.perfil-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  gap: 1.5rem;
+  max-width: 600px;
+  margin: 0 auto;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Título */
+.perfil-titulo {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+/* Card base */
+.perfil-card {
+  width: 100%;
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-label {
-  font-weight: bold;
-  margin-right: 0.5rem;
+/* Foto de perfil */
+.foto-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.8rem;
+}
+
+.foto-perfil {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #e0e0e0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.foto-botoes {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+/* Campos */
+.campo-perfil {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  position: relative;
+}
+
+.campo-label {
+  font-weight: 600;
+  color: #444;
+  font-size: 0.95rem;
+}
+
+.campo-valor {
+  background: #f8f8f8;
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
+  color: #555;
+  font-size: 0.95rem;
 }
 
 input {
-  margin-right: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.95rem;
 }
-img {
-  margin-top: 0.5rem;
+
+/* Ícone de edição */
+.botao-icone {
+  position: absolute;
+  right: 10px;
+  top: 70%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: #777;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: color 0.2s;
+}
+
+.botao-icone:hover {
+  color: #333;
+}
+
+/* Botões */
+.botao-primario {
+  background: #4caf50;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.45rem 1rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.botao-primario:hover {
+  background: #43a047;
+}
+
+.botao-secundario {
+  background: #f0f0f0;
+  color: #333;
+  border: none;
+  border-radius: 8px;
+  padding: 0.45rem 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.botao-secundario:hover {
+  background: #e0e0e0;
+}
+
+.acoes-edicao {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.3rem;
+}
+
+.relative {
+  position: relative;
+}
+
+.icone-trocar {
+  background-color: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icone-trocar:hover {
+  opacity: 1;
+}
+
+.icone-trocar i {
+  color: white;
+  font-size: 2rem;
+}
+
+.botao-trocar-foto {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0.4rem 1rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  font-weight: 500;
+  color: #333;
+}
+
+.botao-trocar-foto:hover {
+  background-color: #eaeaea;
+}
+
+.botao-trocar-foto i {
+  font-size: 1rem;
+  color: #555;
+}
+
+.botao-salvar {
+  margin-top: 0.6rem;
+  background: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.4rem 1rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.botao-salvar:hover {
+  background: #43a047;
 }
 </style>

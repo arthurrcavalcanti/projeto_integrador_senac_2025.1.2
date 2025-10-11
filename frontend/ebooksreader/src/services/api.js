@@ -44,6 +44,22 @@ export const listarReviews = async (id) => {
   return await resultado.json()
 }
 
+export const deletarReview = async (id) => {
+  console.log('Chamando api de deletar review', id)
+  const resp = await fetch(`${address}/reviews/${id}`, {
+    method: 'DELETE',
+  })
+  if (!resp.ok) {
+    let msg = 'Erro ao deletar review'
+    try {
+      const j = await resp.json()
+      msg = j.error || msg
+    } catch (e) {}
+    throw new Error(msg)
+  }
+  return true
+}
+
 export const criarUsuario = async (usuario) => {
   console.log('Chamando api de criar usuario')
   const resultado = await fetch(`${address}/users`, {
@@ -106,6 +122,7 @@ const api = {
   // REVIEWS
   enviarReview,
   listarReviews,
+  deletarReview,
 
   // USERS
   criarUsuario,

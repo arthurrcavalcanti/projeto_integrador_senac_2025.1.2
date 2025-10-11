@@ -38,6 +38,7 @@ app.delete("/books/:id", bookController.delete);
 app.get("/reviews/:id", reviewController.listById);
 app.get("/reviews/book/:id", reviewController.listByBookId);
 app.post("/reviews", reviewController.create);
+app.delete("/reviews/:id", reviewController.delete);
 // Outros endpoints de livros, reviews, etc virão aqui...
 
 app.listen(3000, "localhost", () => {

@@ -1,25 +1,34 @@
 <script>
 import api from '../services/api.js'
+import { buscarImagemUsuario } from '../services/api.js'
+
 export default {
   props: ['id'], // recebe o id do livro como propriedade no caso vinda da query string
   data() {
     return {
       livro: undefined,
-      content: undefined,
-      rating: undefined,
-
+      content: '',
+      rating: 0,
       reviews: [], // Inicializa a lista de reviews
-
-      star1: false,
-      star2: false,
-      star3: false,
-      star4: false,
-      star5: false,
-
       usuario: undefined,
+      showFullDesc: false,
+      successMsg: null,
+      errorMsg: null,
+      sendingReview: false,
+      sendingCommentId: null,
     }
   },
   methods: {
+    buscarImagemUsuario,
+    avatarUrlFor(user) {
+      if (!user?.id) return 'https://cdn-icons-png.flaticon.com/512/149/149071.png'
+      return this.buscarImagemUsuario(user.id)
+    },
+    onAvatarError(e) {
+      // Evita loop caso a imagem de fallback também falhe
+      e.target.onerror = null
+      e.target.src = 'https://cdn-icons-png.flaticon.com/512/149/149071.png'
+    },
     async buscarLivro() {
       const response = await api.buscarLivros(this.id)
       console.log('Livro encontrado:', { response })
@@ -30,12 +39,12 @@ export default {
     },
     async avaliarLivro() {
       const { livro, content, rating } = this
-      console.log('Tentando adicionar review:', { livro, content, rating })
-      if (!livro.id || !rating || rating < 1 || rating > 5) {
-        alert('Por favor, insira uma nota válida de 1 a 5.')
+      if (!livro?.id || !rating || rating < 1 || rating > 5) {
+        this.errorMsg = 'Por favor, insira uma nota válida de 1 a 5.'
+        setTimeout(() => (this.errorMsg = null), 2500)
         return
       }
-
+      this.sendingReview = true
       try {
         await api.enviarReview({
           book_id: livro.id,
@@ -44,18 +53,23 @@ export default {
           user_id: this.usuario.id,
           review_id: null,
         })
-        alert('Avaliação enviada! Obrigado.')
+        this.content = ''
+        this.rating = 0
+        await this.listarReviews()
+        this.successMsg = 'Avaliação enviada!'
+        setTimeout(() => (this.successMsg = null), 2000)
       } catch (error) {
         console.error('Erro ao enviar avaliação:', error)
-        alert('Erro ao enviar avaliação.')
+        this.errorMsg = 'Erro ao enviar avaliação.'
+        setTimeout(() => (this.errorMsg = null), 2500)
+      } finally {
+        this.sendingReview = false
       }
-
-      // Aqui você poderia recarregar a lista para atualizar a média:
-      this.buscarLivro()
     },
     async comentar(reviewResponse) {
-      const { livro, content, rating } = this
-      console.log({ reviewResponse })
+      const { livro } = this
+      if (!reviewResponse?.responseMsg || !reviewResponse.id) return
+      this.sendingCommentId = reviewResponse.id
       try {
         await api.enviarReview({
           book_id: livro.id,
@@ -64,39 +78,42 @@ export default {
           user_id: this.usuario.id,
           review_id: reviewResponse.id,
         })
-        alert('Comentário! Obrigado.')
+        reviewResponse.responseMsg = ''
+        await this.listarReviews()
+        this.successMsg = 'Comentário enviado!'
+        setTimeout(() => (this.successMsg = null), 2000)
       } catch (error) {
-        console.error('Erro ao enviar avaliação:', error)
-        alert('Erro ao enviar avaliação.')
+        console.error('Erro ao enviar comentário:', error)
+        this.errorMsg = 'Erro ao enviar comentário.'
+        setTimeout(() => (this.errorMsg = null), 2500)
+      } finally {
+        this.sendingCommentId = null
       }
-
-      // Aqui você poderia recarregar a lista para atualizar a média:
-      this.buscarLivro()
     },
     async listarReviews() {
       const { livro } = this
-      if (!livro.id) {
-        return
-      }
+      if (!livro?.id) return
       const response = await api.listarReviews(livro.id)
       console.log('Reviews encontrados:', { response })
       if (response) {
-        this.reviews = response.map((r) => {
-          return {
-            ...r,
-            showComents: false,
-          }
-        })
+        this.reviews = response.map((r) => ({
+          ...r,
+          showComents: false,
+          responseMsg: '',
+        }))
       }
     },
     selectStar(nota) {
-      this.star1 = nota >= 1
-      this.star2 = nota >= 2
-      this.star3 = nota >= 3
-      this.star4 = nota >= 4
-      this.star5 = nota >= 5
-
       this.rating = nota
+    },
+    async deletarReview(id) {
+      if (!confirm('Tem certeza que deseja apagar esta avaliação?')) return
+      try {
+        await api.deletarReview(id)
+        this.listarReviews()
+      } catch (e) {
+        alert(e.message || 'Falha ao deletar')
+      }
     },
   },
   mounted() {
@@ -117,60 +134,150 @@ export default {
 
 <template>
   <div v-if="livro" class="detalhes-livro">
-    <h1>Detalhes do Livro</h1>
-    <div class="info-livro" v-if="livro">
-      <h2>{{ livro.title }}</h2>
-      <p><strong>Autor:</strong> {{ livro.author }}</p>
-    </div>
-    <div class="descricao">
-      <img :src="livro.cover" alt="Capa do livro" />
-      <p>{{ livro.description }}</p>
-    </div>
-    <form class="review-form" @submit.prevent="avaliarLivro">
-      <h3>Faça seu review</h3>
+    <!-- Cabeçalho -->
+    <div class="livro-header">
+      <img :src="livro.cover" alt="Capa do livro" class="livro-capa" />
+      <div class="livro-info">
+        <h1>{{ livro.title }}</h1>
 
-      <label for="nota">Sua nota</label>
-      <div class="rating-define">
-        <span @click="selectStar(1)" :class="{ 'fa fa-star': true, checked: star1 }"></span>
-        <span @click="selectStar(2)" :class="{ 'fa fa-star': true, checked: star2 }"></span>
-        <span @click="selectStar(3)" :class="{ 'fa fa-star': true, checked: star3 }"></span>
-        <span @click="selectStar(4)" :class="{ 'fa fa-star': true, checked: star4 }"></span>
-        <span @click="selectStar(5)" :class="{ 'fa fa-star': true, checked: star5 }"></span>
+        <div class="livro-meta">
+          <span class="chip"><i class="fas fa-user-pen"></i> {{ livro.author }}</span>
+        </div>
+
+        <p class="descricao" :class="{ clamp: !showFullDesc }">
+          {{ livro.description }}
+        </p>
+        <button
+          v-if="livro?.description && livro.description.length > 220"
+          class="btn-link"
+          @click.prevent="showFullDesc = !showFullDesc"
+        >
+          {{ showFullDesc ? 'Ver menos' : 'Ver mais' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Formulário de avaliação -->
+    <form class="review-form card" @submit.prevent="avaliarLivro">
+      <h3>Faça sua avaliação</h3>
+
+      <div class="rating-define" role="radiogroup" aria-label="Definir nota">
+        <button
+          v-for="i in 5"
+          :key="'rate-' + i"
+          type="button"
+          class="star-btn"
+          :disabled="sendingReview"
+          :aria-pressed="rating >= i"
+          :aria-label="`Nota ${i}`"
+          @click="selectStar(i)"
+          @keydown.enter.prevent="selectStar(i)"
+          @keydown.space.prevent="selectStar(i)"
+        >
+          <!-- Alterado: binding explícito de classes e cor -->
+          <i
+            :class="[rating >= i ? 'fas' : 'far', 'fa-star']"
+            :style="{ color: rating >= i ? '#f5a623' : '#ccc' }"
+          ></i>
+        </button>
       </div>
 
-      <label for="comentario">Seu Comentário</label>
-      <textarea id="comentario" v-model="content"></textarea>
-      <button type="submit">Enviar</button>
+      <textarea
+        v-model="content"
+        placeholder="Escreva seu comentário..."
+        :disabled="sendingReview"
+      ></textarea>
+      <button type="submit" class="btn-enviar" :disabled="sendingReview">
+        {{ sendingReview ? 'Enviando...' : 'Enviar avaliação' }}
+      </button>
+      <p v-if="successMsg" class="msg success">{{ successMsg }}</p>
+      <p v-if="errorMsg" class="msg error">{{ errorMsg }}</p>
     </form>
 
-    <div
-      class="review-lista"
-      v-for="review in reviews.filter((r) => !r.review_id)"
-      :key="review.id"
-    >
-      <h4>{{ review.user.name }}</h4>
-      <div class="rating-detalhes" v-if="review.rating">
-        <span>{{ review.rating }}</span>
-        <span :class="{ 'fa fa-star': true, checked: review.rating >= 1 }"></span>
-        <span :class="{ 'fa fa-star': true, checked: review.rating >= 2 }"></span>
-        <span :class="{ 'fa fa-star': true, checked: review.rating >= 3 }"></span>
-        <span :class="{ 'fa fa-star': true, checked: review.rating >= 4 }"></span>
-        <span :class="{ 'fa fa-star': true, checked: review.rating >= 5 }"></span>
-      </div>
-      <p><strong>Comentário:</strong> {{ review.content }}</p>
-      <button v-on:click.prevent="() => (review.showComents = !review.showComents)">
-        {{ review.showComents ? 'Esconder' : 'Mostrar' }} comentários
-      </button>
-      <div class="comments" v-if="review.showComents">
-        <div class="comment" v-for="comment in reviews.filter((r) => r.review_id == review.id)">
-          <p>{{ comment.user.name }}</p>
-          <p><strong>Comentário:</strong> {{ comment.content }}</p>
+    <!-- Lista de reviews -->
+    <div class="reviews-container">
+      <h3>O que as pessoas acharam</h3>
+
+      <div
+        v-for="review in reviews.filter((r) => !r.review_id)"
+        :key="review.id"
+        class="review-card"
+      >
+        <div class="review-header">
+          <img
+            :src="avatarUrlFor(review.user)"
+            alt="Foto do usuário"
+            class="user-foto"
+            @error="onAvatarError"
+          />
+          <div class="review-meta">
+            <h4>{{ review.user?.name }}</h4>
+            <div class="rating-detalhes" aria-label="Nota do review">
+              <i
+                v-for="i in 5"
+                :key="'rv-' + review.id + '-' + i"
+                :class="[review.rating >= i ? 'fas' : 'far', 'fa-star']"
+                :style="{ color: review.rating >= i ? '#f5a623' : '#ccc' }"
+              ></i>
+            </div>
+          </div>
+          <button
+            v-if="usuario && review.user?.id === usuario.id && !review.review_id"
+            class="icon-delete"
+            @click.prevent="deletarReview(review.id)"
+            aria-label="Excluir avaliação"
+          >
+            <i class="fas fa-trash"></i>
+          </button>
         </div>
-        <form v-on:submit.prevent="comentar(review)">
-          <label for="comentario">Seu Comentário</label>
-          <textarea id="comentario" v-model="review.responseMsg"></textarea>
-          <button type="submit">Comentar</button>
-        </form>
+
+        <p class="review-content">{{ review.content }}</p>
+
+        <button class="btn-comentarios" @click.prevent="review.showComents = !review.showComents">
+          {{ review.showComents ? 'Esconder comentários' : 'Mostrar comentários' }}
+        </button>
+
+        <div v-if="review.showComents" class="comments">
+          <div
+            v-for="comment in reviews.filter((r) => r.review_id == review.id)"
+            :key="comment.id"
+            class="comment"
+          >
+            <div class="comment-header">
+              <img
+                :src="avatarUrlFor(comment.user)"
+                alt="Foto do usuário"
+                class="user-foto small"
+                @error="onAvatarError"
+              />
+              <strong>{{ comment.user?.name }}</strong>
+              <button
+                v-if="usuario && comment.user?.id === usuario.id && comment.review_id"
+                class="icon-delete"
+                @click.prevent="deletarReview(comment.id)"
+                aria-label="Excluir comentário"
+              >
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+            <p>{{ comment.content }}</p>
+          </div>
+
+          <form class="comment-form" @submit.prevent="comentar(review)">
+            <textarea
+              v-model="review.responseMsg"
+              placeholder="Escreva um comentário..."
+              :disabled="sendingCommentId === review.id"
+            ></textarea>
+            <button type="submit" class="btn-enviar" :disabled="sendingCommentId === review.id">
+              {{ sendingCommentId === review.id ? 'Enviando...' : 'Comentar' }}
+            </button>
+            <p v-if="successMsg && sendingCommentId === null" class="msg success">
+              {{ successMsg }}
+            </p>
+            <p v-if="errorMsg && sendingCommentId === null" class="msg error">{{ errorMsg }}</p>
+          </form>
+        </div>
       </div>
     </div>
   </div>
@@ -178,96 +285,329 @@ export default {
 
 <style>
 /* TODO: adicionar estilos a página */
-.rating-detalhes {
+.detalhes-livro {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  font-family: 'Inter', sans-serif;
   display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Cabeçalho */
+.livro-header {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+  background: linear-gradient(135deg, #ffffff 0%, #f7f9ff 100%);
+  padding: 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  border: 1px solid #eef1f6;
+}
+
+.livro-capa {
+  width: 180px;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border: 4px solid #fff;
+}
+
+.livro-info {
+  flex: 1;
+}
+
+.livro-info h1 {
+  font-size: 2rem;
+  margin-bottom: 0.25rem;
+  color: #1f2937;
+  letter-spacing: 0.2px;
+}
+
+.livro-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.25rem 0 0.75rem 0;
+}
+
+.chip {
+  display: inline-flex;
   align-items: center;
-  justify-content: start;
-  gap: 0.5em;
-  :first-child {
-    border: 1px solid orange;
-    border-radius: 0.5em;
-    padding: 0.5em;
-    background: rgba(241, 90, 34, 0.05);
-  }
+  gap: 0.4rem;
+  background: #eef2ff;
+  color: #3b4aa1;
+  border: 1px solid #e2e8ff;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+}
+
+.descricao {
+  color: #4b5563;
+  line-height: 1.7;
+  font-size: 1rem;
+}
+
+.descricao.clamp {
+  display: -webkit-box;
+  line-clamp: 4;
+  -webkit-line-clamp: 4; /* número de linhas quando colapsado */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.btn-link {
+  background: transparent;
+  border: none;
+  color: #165193;
+  cursor: pointer;
+  padding: 0;
+  font-weight: 600;
+  margin-top: 0.25rem;
+}
+.btn-link:hover {
+  text-decoration: underline;
+}
+
+/* Cards */
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+}
+
+/* Formulário de avaliação */
+.review-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.review-form h3 {
+  font-size: 1.2rem;
+  color: #333;
 }
 
 .rating-define {
   display: flex;
+  gap: 0.4rem;
   align-items: center;
-  justify-content: start;
-  gap: 0.5em;
-  > span {
-    &:hover,
-    &:focus-visible {
-      cursor: pointer;
-    }
-
-    &.checked {
-      color: orange;
-    }
-  }
 }
 
-.detalhes-livro {
+.star-btn {
+  background: transparent;
+  border: none;
+  padding: 0.2rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.star-btn:focus {
+  outline: none;
+}
+.star-btn:focus:not(:focus-visible) {
+  outline: none;
+}
+.star-btn:focus-visible {
+  outline: 2px solid #165193;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.fa-star {
+  font-size: 1.6rem;
+  transition: color 0.15s ease-in-out;
+}
+
+.text-gold {
+  color: #f5a623;
+}
+.text-gray {
+  color: #ccc;
+}
+
+.review-form textarea {
+  width: 100%;
+  min-height: 90px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  padding: 0.8rem;
+  font-size: 0.95rem;
+  resize: none;
+}
+
+.btn-enviar {
+  background-color: #165193;
+  color: #fff;
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-enviar:hover {
+  background-color: #103f72;
+}
+
+.btn-enviar:disabled,
+textarea:disabled,
+.star-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Reviews */
+.reviews-container {
   display: flex;
   flex-direction: column;
-  gap: 1em;
+  gap: 1rem;
+}
 
-  .info-livro {
-    display: flex;
+.review-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.2rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.review-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+}
+
+.user-foto {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.user-foto.small {
+  width: 35px;
+  height: 35px;
+}
+
+.rating-detalhes {
+  display: flex;
+  gap: 0.2rem;
+}
+
+.rating-detalhes .fa-star {
+  font-size: 1.2rem;
+}
+
+/* Responsividade */
+@media (max-width: 640px) {
+  .livro-header {
     flex-direction: column;
-    gap: 1em;
-    position: relative;
-
-    .autor {
-      padding-inline-start: 1em;
-    }
-  }
-  .descricao {
-    display: flex;
-    gap: 1em;
-    border: 1px solid #165193;
-    padding: 1em;
-    border-radius: 0.5em;
     align-items: center;
-    background-color: var(--clr-bg-light);
-    img {
-      padding-inline-end: 1em;
-      max-width: 20em;
-      border-inline-end: 1px solid #165193;
-    }
+    text-align: center;
+  }
+  .livro-capa {
+    width: 140px;
+  }
+  .livro-info h1 {
+    font-size: 1.6rem;
   }
 }
 
-.review-form {
-  textarea {
-    height: 5em;
-  }
-
-  button {
-    padding: 0.5em 1em;
-    width: 100%;
-  }
+.review-content {
+  color: #444;
+  font-size: 0.95rem;
+  line-height: 1.5;
 }
 
-.review-lista {
-  border: 1px solid #165193;
-  border-radius: 0.5em;
-  padding: 1em;
-  background-color: var(--clr-bg-light);
-  display: flex;
-  flex-direction: column;
-  gap: 1em;
-}
-
+/* Comentários */
 .comments {
   display: flex;
   flex-direction: column;
-  gap: 1em;
+  gap: 1rem;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #eee;
 }
+
 .comment {
-  background: rgb(212, 249, 252);
-  padding: 0.5em;
-  border-radius: 0.5em;
+  background: #f9f9f9;
+  border-radius: 12px;
+  padding: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.comment-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: #333;
+  position: relative;
+}
+
+.comment-form textarea {
+  min-height: 60px;
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 0.6rem;
+  font-size: 0.9rem;
+  resize: none;
+}
+
+.btn-comentarios {
+  background: none;
+  border: none;
+  color: #165193;
+  cursor: pointer;
+  font-weight: 500;
+  align-self: flex-start;
+}
+
+.btn-comentarios:hover {
+  text-decoration: underline;
+}
+
+.msg {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+.msg.success {
+  color: #2e7d32;
+}
+.msg.error {
+  color: #c62828;
+}
+
+/* Botão de excluir como ícone vermelho, à direita e centralizado */
+.icon-delete {
+  background: transparent;
+  border: none;
+  color: #e53935;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  position: absolute;
+  right: 0.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 0.25rem;
+}
+.icon-delete:hover {
+  color: #c62828;
 }
 </style>
