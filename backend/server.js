@@ -23,8 +23,9 @@ app.get("/", (req, res) => res.send("Hello World"));
 
 // USERS
 app.get("/users", userController.list);
-app.post("/users", userController.create);
-app.put("/users", userController.update);
+app.get("/users/:id/image", userController.getImage); // <-- Adicione esta linha
+app.post("/users", userController.uploadImageMiddleware, userController.create);
+app.put("/users", userController.uploadImageMiddleware, userController.update);
 app.post("/users/login", userController.login);
 app.delete("/users/:id", userController.delete);
 
@@ -37,6 +38,7 @@ app.delete("/books/:id", bookController.delete);
 app.get("/reviews/:id", reviewController.listById);
 app.get("/reviews/book/:id", reviewController.listByBookId);
 app.post("/reviews", reviewController.create);
+app.delete("/reviews/:id", reviewController.delete);
 // Outros endpoints de livros, reviews, etc virão aqui...
 
 app.listen(3000, "localhost", () => {

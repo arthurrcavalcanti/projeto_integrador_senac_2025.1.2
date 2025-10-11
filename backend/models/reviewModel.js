@@ -20,6 +20,36 @@ const getByBookId = (book_id) => {
     .where("reviews.book_id", book_id);
 };
 const create = (data) => knex("reviews").insert(data);
+
+// Remove APENAS o id informado (sem tratar dependências)
 const remove = (id) => knex("reviews").where({ id }).del();
 
-module.exports = { getAll, getById, create, remove, getByBookId };
+// Remove review + comentários filhos + vínculos em userreviews
+const removeCascade = async (id) => {
+  return knex.transaction(async (trx) => {
+    // filhos (comentários) desta review
+    const childIds = await trx("reviews").where({ review_id: id }).pluck("id");
+
+    if (childIds.length) {
+      // vínculos userreviews dos filhos
+      await trx("userreviews").whereIn("review_id", childIds).del();
+      // apaga filhos
+      await trx("reviews").whereIn("id", childIds).del();
+    }
+
+    // vínculo userreviews do pai
+    await trx("userreviews").where({ review_id: id }).del();
+    // apaga pai
+    const deleted = await trx("reviews").where({ id }).del();
+    return deleted;
+  });
+};
+
+module.exports = {
+  getAll,
+  getById,
+  create,
+  remove,
+  removeCascade,
+  getByBookId,
+};

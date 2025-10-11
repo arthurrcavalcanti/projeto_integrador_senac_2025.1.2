@@ -44,6 +44,22 @@ export const listarReviews = async (id) => {
   return await resultado.json()
 }
 
+export const deletarReview = async (id) => {
+  console.log('Chamando api de deletar review', id)
+  const resp = await fetch(`${address}/reviews/${id}`, {
+    method: 'DELETE',
+  })
+  if (!resp.ok) {
+    let msg = 'Erro ao deletar review'
+    try {
+      const j = await resp.json()
+      msg = j.error || msg
+    } catch (e) {}
+    throw new Error(msg)
+  }
+  return true
+}
+
 export const criarUsuario = async (usuario) => {
   console.log('Chamando api de criar usuario')
   const resultado = await fetch(`${address}/users`, {
@@ -71,31 +87,30 @@ export const loginUsuario = async (usuario) => {
   return resultado
 }
 
+export const buscarImagemUsuario = (id) => {
+  return `${address}/users/${id}/image`
+}
+
 export const buscarUsuario = async (usuario) => {}
 
-export const atualizarUsuario = async (usuario) => {
-  console.log('Chamando API de atualizar usuário', { usuario })
-  try {
-    const response = await fetch(`${address}/users`, {
-      method: 'PUT', // PUT é para definir que será um update, podendo usar o mesmo endpoint
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ usuario }),
-    })
-
-    if (!response.ok) {
-      const errorData = await response.json()
-      throw new Error(errorData.error || 'Erro ao atualizar usuário')
+export async function atualizarUsuario(data, isMultipart = false) {
+  const address = 'http://localhost:3000' // ajuste se necessário
+  let options = {}
+  if (isMultipart) {
+    options = {
+      method: 'PUT',
+      body: data, // FormData
     }
-
-    const data = await response.json()
-    console.log('Usuário atualizado com sucesso', data)
-    return data
-  } catch (error) {
-    console.error('Falha na API de atualizar usuário:', error.message)
-    throw error
+  } else {
+    options = {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }
   }
+  const response = await fetch(`${address}/users`, options)
+  if (!response.ok) throw new Error('Erro ao atualizar usuário')
+  return await response.json()
 }
 
 const api = {
@@ -107,11 +122,13 @@ const api = {
   // REVIEWS
   enviarReview,
   listarReviews,
+  deletarReview,
 
   // USERS
   criarUsuario,
   loginUsuario,
   buscarUsuario,
+  buscarImagemUsuario,
 }
 
 export default api

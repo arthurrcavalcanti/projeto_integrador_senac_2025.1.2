@@ -7,27 +7,34 @@ export default {
   props: [],
   data() {
     return {
-      advice: undefined,
       logado: false,
       naoCriado: true,
       email: undefined,
       senha: undefined,
       nome: undefined,
+      currentUser: null,
+      showAvatar: true,
     }
   },
   watch: {},
-  computed: {},
-  methods: {
-    // api de exemplo que busca um conselho aleatório
-    async buscarAdvice() {
-      // informações sobre api https://api.adviceslip.com/#endpoint-random
-      const response = await fetch('https://api.adviceslip.com/advice')
-      const data = await response.json()
-      console.log('Conselho:', { data })
-
-      // usando o modelo do json é possível pegar a propriedade correta, no navegador aparece o json:
-      this.advice = data.slip.advice
+  computed: {
+    avatarUrl() {
+      if (!this.currentUser) return null
+      return api.buscarImagemUsuario(this.currentUser.id)
     },
+    userName() {
+      return this.currentUser?.name || 'Usuário'
+    },
+    userInitials() {
+      const n = this.currentUser?.name?.trim()
+      if (!n) return 'U'
+      const parts = n.split(' ')
+      const a = parts[0]?.[0] || ''
+      const b = parts.length > 1 ? parts[parts.length - 1]?.[0] : ''
+      return (a + b).toUpperCase()
+    },
+  },
+  methods: {
     async logarUsuario() {
       const { email, senha } = this
       scrollX
@@ -43,6 +50,7 @@ export default {
         const user = await resultado.json()
         sessionStorage.setItem('user', JSON.stringify(user))
         console.log('Logado:', { user })
+        this.currentUser = user
       } else {
         const { error } = await resultado.json()
         alert(error)
@@ -70,12 +78,20 @@ export default {
       sessionStorage.removeItem('logado')
       sessionStorage.removeItem('user')
       console.log('Deslogado')
+      this.currentUser = null
+      this.showAvatar = true
     },
   },
   mounted() {
     console.log('App Montado')
-    this.buscarAdvice()
-    this.logado = sessionStorage.getItem('logado')
+    const l = sessionStorage.getItem('logado')
+    this.logado = l === true || l === 'true'
+    try {
+      const u = sessionStorage.getItem('user')
+      this.currentUser = u ? JSON.parse(u) : null
+    } catch (e) {
+      this.currentUser = null
+    }
   },
 }
 </script>
@@ -84,15 +100,26 @@ export default {
   <header>
     <div class="wrapper">
       <nav>
-        <img class="logo-img" src="../public/ReadUp_logo_2.png" alt="Logo ReadUp" />
+        <RouterLink to="/" class="logo-link" aria-label="Ir para a página inicial">
+          <img class="logo-img" src="../public/ReadUp_logo_2.png" alt="Logo ReadUp" />
+        </RouterLink>
         <RouterLink v-if="logado" to="/">Lista de livros</RouterLink>
         <RouterLink v-if="logado" to="/add-livros">Adicionar Livros</RouterLink>
-        <RouterLink v-if="logado" to="/user">Meu perfil</RouterLink>
-        <a class="logout" v-if="logado" href="#" @click.prevent="logout">Sair</a>
       </nav>
 
-      <!-- exemplo de uso do v-if (se a variável advice não for undefined ou nulo, exibe o conselho) -->
-      <p v-if="advice">"{{ advice }}"</p>
+      <div v-if="logado" class="user-box">
+        <RouterLink to="/user" class="user-link" title="Meu perfil">
+          <span class="avatar" v-if="showAvatar && avatarUrl">
+            <img :src="avatarUrl" alt="Foto do usuário" @error="showAvatar = false" />
+          </span>
+          <span v-else class="avatar-fallback" aria-hidden="true">{{ userInitials }}</span>
+          <span class="username">{{ userName }}</span>
+        </RouterLink>
+        <button class="logout-btn" @click.prevent="logout" title="Sair">
+          <i class="fas fa-right-from-bracket" aria-hidden="true"></i>
+          <span class="sr-only">Sair</span>
+        </button>
+      </div>
     </div>
   </header>
 
@@ -147,11 +174,63 @@ export default {
         text-decoration: underline;
       }
     }
+    .logo-link {
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+    }
+    .logo-link:hover {
+      text-decoration: none;
+    }
   }
-
-  > p {
-    font-size: 0.9em;
-    margin: 0;
+  .user-box {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .user-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: inherit;
+    text-decoration: none;
+    padding: 0.25rem 0.5rem;
+    border-radius: 999px;
+    transition: background-color 0.2s;
+  }
+  .user-link:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+  .avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    background: #f3f4f6;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .avatar-fallback {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #165193;
+    color: #fff;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .username {
+    font-weight: 600;
   }
 }
 .form-login-wrapper {
@@ -192,9 +271,27 @@ export default {
     }
   }
 }
-.logout {
-  text-decoration: none;
+.logout-btn {
+  background: transparent;
+  border: none;
+  color: #6b7280;
   cursor: pointer;
-  color: var(--clr-theme);
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+}
+.logout-btn:hover {
+  color: #374151;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
 }
 </style>
