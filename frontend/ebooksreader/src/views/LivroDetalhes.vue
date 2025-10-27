@@ -1,8 +1,11 @@
 <script>
 import api from '../services/api.js'
 import { buscarImagemUsuario } from '../services/api.js'
+import HeartButton from '../components/HeartButton.vue'
+import AddToListButton from '../components/AddToListButton.vue'
 
 export default {
+  components: { HeartButton, AddToListButton },
   props: ['id'], // recebe o id do livro como propriedade no caso vinda da query string
   data() {
     return {
@@ -16,6 +19,7 @@ export default {
       errorMsg: null,
       sendingReview: false,
       sendingCommentId: null,
+      isLiked: false,
     }
   },
   methods: {
@@ -35,7 +39,23 @@ export default {
       if (response) {
         this.livro = response[0]
         this.listarReviews()
+        this.verificarCurtida()
       }
+    },
+    async verificarCurtida() {
+      if (!this.usuario || !this.livro) return
+      try {
+        const { hasLiked } = await api.verificarCurtida(this.usuario.id, this.livro.id)
+        this.isLiked = hasLiked
+      } catch (e) {
+        console.error('Erro ao verificar curtida:', e)
+      }
+    },
+    onLiked() {
+      this.isLiked = true
+    },
+    onUnliked() {
+      this.isLiked = false
     },
     async avaliarLivro() {
       const { livro, content, rating } = this
@@ -138,7 +158,19 @@ export default {
     <div class="livro-header">
       <img :src="livro.cover" alt="Capa do livro" class="livro-capa" />
       <div class="livro-info">
-        <h1>{{ livro.title }}</h1>
+        <div class="title-heart-wrapper">
+          <h1>{{ livro.title }}</h1>
+          <div v-if="usuario && livro" class="book-actions">
+            <HeartButton
+              :book-id="livro.id"
+              :user-id="usuario.id"
+              :initial-liked="isLiked"
+              @liked="onLiked"
+              @unliked="onUnliked"
+            />
+            <AddToListButton :book-id="livro.id" :user-id="usuario.id" />
+          </div>
+        </div>
 
         <div class="livro-meta">
           <span class="chip"><i class="fas fa-user-pen"></i> {{ livro.author }}</span>
@@ -319,11 +351,26 @@ export default {
   flex: 1;
 }
 
+.title-heart-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-content: space-between;
+  position: relative;
+}
+
+.title-heart-wrapper .book-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
 .livro-info h1 {
   font-size: 2rem;
   margin-bottom: 0.25rem;
   color: #1f2937;
   letter-spacing: 0.2px;
+  flex: 1;
 }
 
 .livro-meta {

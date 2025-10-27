@@ -39,9 +39,9 @@ exports.create = async (req, res) => {
   const { title, author, description, isbn, cover } = req.body;
   try {
     console.log(`Tentando criar livro: ${title}`);
-    const [id] = await Book.create({ title, author, description, isbn, cover  });
+    const [id] = await Book.create({ title, author, description, isbn, cover });
     console.log(`Livro: ${title} criado com sucesso!`);
-    res.status(201).json({ id, title, author, description, isbn  });
+    res.status(201).json({ id, title, author, description, isbn });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }

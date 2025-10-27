@@ -113,6 +113,80 @@ export async function atualizarUsuario(data, isMultipart = false) {
   return await response.json()
 }
 
+// BOOK LISTS
+export const adicionarLivroNaLista = async (user_id, book_id, list_name = 'default') => {
+  const resultado = await fetch(`${address}/lists`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user_id, book_id, list_name }),
+  })
+  if (!resultado.ok) throw new Error('Erro ao adicionar livro na lista')
+  return await resultado.json()
+}
+
+export const obterListasDoUsuario = async (user_id) => {
+  const resultado = await fetch(`${address}/lists/user/${user_id}`)
+  return await resultado.json()
+}
+
+export const obterLivrosDaLista = async (user_id, list_name) => {
+  const resultado = await fetch(`${address}/lists/user/${user_id}/${encodeURIComponent(list_name)}`)
+  return await resultado.json()
+}
+
+export const obterTodosLivrosDoUsuario = async (user_id) => {
+  const resultado = await fetch(`${address}/lists/user/${user_id}/all`)
+  return await resultado.json()
+}
+
+export const removerLivroDaLista = async (user_id, book_id, list_name) => {
+  const resultado = await fetch(
+    `${address}/lists/user/${user_id}/book/${book_id}/${encodeURIComponent(list_name)}`,
+    { method: 'DELETE' }
+  )
+  if (!resultado.ok) throw new Error('Erro ao remover livro da lista')
+  return true
+}
+
+// BOOK LIKES
+export const curtirLivro = async (user_id, book_id) => {
+  const resultado = await fetch(`${address}/likes`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user_id, book_id }),
+  })
+  if (!resultado.ok) throw new Error('Erro ao curtir livro')
+  return await resultado.json()
+}
+
+export const descurtirLivro = async (user_id, book_id) => {
+  const resultado = await fetch(`${address}/likes/user/${user_id}/book/${book_id}`, {
+    method: 'DELETE',
+  })
+  if (!resultado.ok) throw new Error('Erro ao descurtir livro')
+  return true
+}
+
+export const verificarCurtida = async (user_id, book_id) => {
+  const resultado = await fetch(`${address}/likes/user/${user_id}/book/${book_id}`)
+  return await resultado.json()
+}
+
+export const obterLivrosCurtidos = async (user_id) => {
+  const resultado = await fetch(`${address}/likes/user/${user_id}`)
+  return await resultado.json()
+}
+
+export const obterContagemCurtidas = async (book_id) => {
+  const resultado = await fetch(`${address}/likes/book/${book_id}/count`)
+  return await resultado.json()
+}
+
+export const obterSugestoes = async (user_id, limit = 10) => {
+  const resultado = await fetch(`${address}/suggestions/user/${user_id}?limit=${limit}`)
+  return await resultado.json()
+}
+
 const api = {
   // BOOKS
   listarLivros,
@@ -129,6 +203,21 @@ const api = {
   loginUsuario,
   buscarUsuario,
   buscarImagemUsuario,
+
+  // LISTS
+  adicionarLivroNaLista,
+  obterListasDoUsuario,
+  obterLivrosDaLista,
+  obterTodosLivrosDoUsuario,
+  removerLivroDaLista,
+
+  // LIKES
+  curtirLivro,
+  descurtirLivro,
+  verificarCurtida,
+  obterLivrosCurtidos,
+  obterContagemCurtidas,
+  obterSugestoes,
 }
 
 export default api

@@ -1,17 +1,23 @@
 <script>
 // api.js é onde você encontra as chamadas para as rotas definidas em server.js no backend.
 import api from '../services/api.js'
+import HeartButton from '../components/HeartButton.vue'
+import AddToListButton from '../components/AddToListButton.vue'
 
 export default {
+  components: { HeartButton, AddToListButton },
   props: [],
   data() {
     return {
       // aqui você pode criar variáveis que podem ser usadas no template
       livros: [],
+      sugestoes: [],
       pesquisa: undefined,
       debounceTimer: null,
       loading: false,
       errorMsg: null,
+      usuario: null,
+      likedBooks: new Set(),
     }
   },
   watch: {
@@ -46,11 +52,40 @@ export default {
         const livros = await api.listarLivros()
         console.log('Livros:', { livros })
         this.livros = livros
+        await this.carregarLikesDosLivros()
       } catch (e) {
         this.errorMsg = 'Não foi possível carregar os livros.'
       } finally {
         this.loading = false
       }
+    },
+    async carregarLikesDosLivros() {
+      if (!this.usuario) return
+      try {
+        const { books } = await api.obterLivrosCurtidos(this.usuario.id)
+        this.likedBooks = new Set(books.map((b) => b.id))
+      } catch (e) {
+        console.error('Erro ao carregar curtidas:', e)
+      }
+    },
+    async carregarSugestoes() {
+      if (!this.usuario) return
+      try {
+        const { suggestions } = await api.obterSugestoes(this.usuario.id, 6)
+        this.sugestoes = suggestions || []
+      } catch (e) {
+        console.error('Erro ao carregar sugestões:', e)
+      }
+    },
+    isLiked(bookId) {
+      return this.likedBooks.has(bookId)
+    },
+    onLiked(bookId) {
+      this.likedBooks.add(bookId)
+    },
+    onUnliked(bookId) {
+      this.likedBooks.delete(bookId)
+      this.carregarSugestoes()
     },
     async buscarLivro() {
       const { pesquisa } = this
@@ -82,7 +117,15 @@ export default {
     // esse método é chamado assim que o componente é montado em tela
     // é chamado apenas uma vez
     console.log('Montado') // mensagens do console.log aparecem no console do navegador
+    const logado = sessionStorage.getItem('logado')
+    if (logado) {
+      const user = JSON.parse(sessionStorage.getItem('user'))
+      if (user) {
+        this.usuario = user
+      }
+    }
     this.listarLivros()
+    this.carregarSugestoes()
   },
 }
 </script>
@@ -114,6 +157,31 @@ export default {
         </div>
       </form>
     </section>
+
+    <!-- Suggestions Section -->
+    <section v-if="sugestoes.length > 0 && !pesquisa" class="sugestoes-section">
+      <h2><i class="fas fa-sparkles"></i> Sugestões para você</h2>
+      <ul class="sugestoes-grid">
+        <li v-for="livro in sugestoes" :key="livro.id">
+          <RouterLink :to="`/livro/${livro.isbn}`">
+            <img class="cover" :src="livro.cover" alt="Capa do livro" loading="lazy" />
+            <h3>{{ livro.title }}</h3>
+            <p class="author"><strong>Autor:</strong> {{ livro.author }}</p>
+          </RouterLink>
+          <div class="book-actions">
+            <HeartButton
+              v-if="usuario"
+              :book-id="livro.id"
+              :user-id="usuario.id"
+              :initial-liked="isLiked(livro.id)"
+              @liked="onLiked"
+              @unliked="onUnliked"
+            />
+            <AddToListButton v-if="usuario" :bookId="livro.id" :userId="usuario.id" />
+          </div>
+        </li>
+      </ul>
+    </section>
     <h2>
       <template v-if="pesquisa && pesquisa.trim()">Resultados ({{ numeroLivros }})</template>
       <template v-else>Lista de livros ({{ numeroLivros }})</template>
@@ -122,7 +190,7 @@ export default {
     <p v-if="errorMsg" class="error-msg">{{ errorMsg }}</p>
 
     <ul v-if="!loading && livros && livros.length > 0">
-      <li v-for="livro in livros" :key="livro.isbn">
+      <li v-for="livro in livros" :key="livro.isbn" class="book-card-wrapper">
         <RouterLink :to="`/livro/${livro.isbn}`">
           <img class="cover" :src="livro.cover" alt="Capa do livro" loading="lazy" />
           <h3>{{ livro.title }}</h3>
@@ -150,6 +218,17 @@ export default {
             <span class="no-reviews">Sem avaliações</span>
           </div>
         </RouterLink>
+        <div class="book-actions">
+          <HeartButton
+            v-if="usuario"
+            :book-id="livro.id"
+            :user-id="usuario.id"
+            :initial-liked="isLiked(livro.id)"
+            @liked="onLiked"
+            @unliked="onUnliked"
+          />
+          <AddToListButton v-if="usuario" :book-id="livro.id" :user-id="usuario.id" />
+        </div>
       </li>
     </ul>
 
@@ -440,5 +519,97 @@ form input[type='number'] {
 }
 form button {
   align-self: flex-start;
+}
+
+/* Suggestions Section */
+.sugestoes-section {
+  margin-bottom: 2.5rem;
+}
+
+.sugestoes-section h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.sugestoes-section h2 i {
+  color: #f5a623;
+}
+
+.sugestoes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12em, 1fr));
+  gap: 1.25em;
+  padding: 0;
+  list-style: none;
+}
+
+.sugestoes-grid li {
+  background-color: #fff;
+  min-height: 20em;
+  border-radius: 0.75em;
+  padding: 1em;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+  position: relative;
+}
+
+.sugestoes-grid li:hover {
+  transform: translateY(-0.5em);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+.sugestoes-grid li > a {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+}
+
+.sugestoes-grid img.cover {
+  width: 100%;
+  height: 160px;
+  border-radius: 0.5em;
+  margin-bottom: 0.75em;
+  object-fit: cover;
+}
+
+.sugestoes-grid h3 {
+  text-align: center;
+  font-size: 0.95em;
+  margin-block-end: 0.25em;
+}
+
+.sugestoes-grid .author {
+  color: #666;
+  font-size: 0.85em;
+  text-align: center;
+}
+
+/* Book Actions */
+.book-card-wrapper,
+.sugestoes-grid li {
+  position: relative;
+}
+
+.book-actions {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 10;
+  display: flex;
+  gap: 0.25rem;
+}
+
+.book-actions > * {
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 </style>
