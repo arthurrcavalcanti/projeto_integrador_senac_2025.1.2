@@ -1,4 +1,4 @@
-# Projeto Integrador: Desenvolvimento de Sistemas Orientado a Dispositivos Móveis e Baseados na Web – 4º Semestre TADS/TSI
+# Projeto Integrador: Análise de Soluções Integradas Para Organizações – 5º Semestre TADS/TSI
 
 ## ReadUP
 
@@ -76,6 +76,10 @@ Assim como no frontend, para o backend escolhemos ferramentas e tecnologias que 
 
 Se tratando de um projeto experimental e pequeno nessa primeira fase, precisávamos de um banco de dados simples de gerir e que fosse rápido e eficiente, e além disso, usasse comandos SQL que já estávamos acostumados de outros semestres da faculdade. A solução foi utilizar SQLite, que é gratuíto e fácil de manejar, sendo uma das opções mais leves.
 
+### Modelo Entidade-Relacionamento (MER)
+
+![MER](https://github.com/user-attachments/assets/691164c3-8b73-46f1-ba92-a7f313ff8d9e)
+
 ---
 
 ## Instruções para Executar o Projeto
@@ -113,10 +117,10 @@ Esse comando irá finalmente colocar a aplicação para rodar, sendo assim, irem
 
 ## Vídeo de Apresentação
 
-https://github.com/user-attachments/assets/206ea903-908a-4bd1-9a90-f63baca0a823
+https://github.com/user-attachments/assets/cdd4343c-52cb-4602-9c2b-049cc819a709
 
--  [🎥 Video de Demonstração!](/video-apresentacao/Vídeo-demonstrativo-do-ReadUp.mp4)
--  [🎥 Assista no Youtube!](https://www.youtube.com/watch?v=PZVHuY3xETY)
+-  [🎥 Video de Demonstração!](/video-apresentacao/Demonstração-ReadUp-MVP.mp4)
+-  [🎥 Assista no Youtube!](https://www.youtube.com/watch?v=nUWZw9ScihY)
 
 -  [🎥 Video de Tutorial de Uso!](/video-apresentacao/Apresentação%20e%20Tutorial%20ReadUp.mp4)
 -  [🎥 Assista no Youtube!](https://youtu.be/NVzjItX-kz0)
