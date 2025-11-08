@@ -131,7 +131,7 @@ https://github.com/user-attachments/assets/cdd4343c-52cb-4602-9c2b-049cc819a709
 
 Este projeto foi desenvolvido com o objetivo de simular uma plataforma de leitura de livros online. O Readup permite que usuários naveguem, leiam e gerenciem seus livros digitais de forma simples e intuitiva.
 
-Este é um projeto em constante evolução. Novas funcionalidades como incluir livros e adicionar cometários 
+Este é um projeto em constante evolução, e nessa nova etapa, novas funcionalidades já foram atribuidas. O ReadUp é um aplicativo que não para de crescer. 
 
 Agradecemos a todos que acompanharam e apoiaram o desenvolvimento deste projeto. 
 
